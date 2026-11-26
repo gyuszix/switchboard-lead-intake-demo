@@ -16,6 +16,9 @@ class Submission < ApplicationRecord
 
   validates :transcript, presence: true
 
+  # Any change to the reviewed fields invalidates a built submission.
+  before_save :clear_built_submission, if: :will_save_change_to_fields?
+
   def self.blank_field(name)
     {
       "name" => name,
@@ -47,8 +50,8 @@ class Submission < ApplicationRecord
   def all_resolved? = fields.any? && fields.all? { |f| f["resolution"].present? }
 
   # --- Review rules -----------------------------------------------------
-  # Each returns nil on success or an error message. Resolutions are final,
-  # except that verified fields stay editable (confirmed -> edited).
+  # Each returns nil on success or an error message. Approve and Not provided
+  # are one-time decisions; Edit is always available, on every field.
 
   # Confirms every unresolved verified field. Never touches needs_approval
   # fields or verified fields the broker already edited.
@@ -76,7 +79,7 @@ class Submission < ApplicationRecord
   def edit!(name, new_value)
     field = field(name)
     new_value = FieldChecker.normalize_value(name, new_value)
-    error = edit_error(field) || FieldChecker.format_error(name, new_value)
+    error = FieldChecker.format_error(name, new_value)
     return error if error
 
     update_field(name, "original_value" => field["original_value"] || field["value"],
@@ -96,10 +99,24 @@ class Submission < ApplicationRecord
     nil
   end
 
+  # --- Build -----------------------------------------------------------
+
+  # Builds the submission JSON from the approved values and validates it
+  # against the schema. Saves it only if valid. Returns the list of errors.
+  def build_submission!(now: Time.current)
+    json = SubmissionBuilder.new(self, now: now).call
+    errors = SubmissionValidator.new.call(json)
+    update!(submission_json: json, ready_at: now) if errors.empty?
+    errors
+  end
+
+  def ready? = submission_json.present? && ready_at.present?
+
   private
 
-  def edit_error(field)
-    review_error(field) unless field["category"] == "verified"
+  def clear_built_submission
+    self.submission_json = nil
+    self.ready_at = nil
   end
 
   def review_error(field)

@@ -80,8 +80,12 @@ class ReviewRulesTest < ActiveSupport::TestCase
     assert_equal "60173", field["value"]
   end
 
-  test "resolutions are final" do
-    @s.approve!(:employee_count)
-    assert_equal "Already resolved", @s.edit!(:employee_count, "50")
+  test "approve and not provided are one-time, but resolved fields stay editable" do
+    @s.mark_not_provided!(:employee_count)
+    assert_equal "Already resolved", @s.approve!(:employee_count)
+    assert_nil @s.edit!(:employee_count, "45")
+    field = @s.reload.field(:employee_count)
+    assert_equal "edited", field["resolution"]
+    assert_equal "45", field["value"]
   end
 end
