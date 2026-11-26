@@ -1,0 +1,29 @@
+Broker: Northside Insurance, this is Sam speaking.
+Client: Hey Sam, this is Tom Becker from Greenway Landscaping Co. We're shopping around for insurance this year.
+Broker: Sure thing, Tom. Let me grab some details. The business name is Greenway Landscaping Co.?
+Client: That's right, Greenway Landscaping Co.
+Broker: And your federal employer ID number?
+Client: Hang on, I've got it on a card here. It's 47... uh, 3 9 1, 2 0 5, 5 8 8. Sorry, the print is tiny.
+Broker: No problem, I'll double check it later. What's your business address?
+Client: We're at 88 Mill Pond Road, Naperville, Illinois.
+Broker: And the zip?
+Client: 60540.
+Broker: Tell me about the work you do.
+Client: We do residential and commercial landscaping. Lawn maintenance, planting, irrigation installs and snow removal in the winter.
+Broker: Do you happen to know your NAICS code?
+Client: I think it's 561730, landscaping services.
+Broker: Yep, that's the one. How long have you been operating?
+Client: We've been in business for 6 years now.
+Broker: What did you bring in for revenue last year?
+Client: Annual revenue was $1,250,000.
+Broker: How many employees?
+Client: We have 22 employees, a lot of them seasonal.
+Broker: What coverage are you after?
+Client: General liability and commercial auto for the trucks, plus workers compensation.
+Broker: When do you want it to start?
+Client: Our current policy runs out, so we'd want it to start March 1st, 2027.
+Broker: Okay. And who should I list as the contact?
+Client: Put me down, Tom Becker.
+Broker: Great, Tom. I'll get some numbers together and give you a call back.
+Client: Sounds good. Honestly the phone is the best way to reach me, I'm out on job sites all day.
+Broker: Understood. Talk to you soon.

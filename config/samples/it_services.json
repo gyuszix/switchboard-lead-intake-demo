@@ -1,0 +1,93 @@
+{
+  "business_name": {
+    "value": "Brightpath IT Solutions Inc",
+    "source_quote": "We're Brightpath IT Solutions Inc.",
+    "all_mentions": [
+      "We're Brightpath IT Solutions Inc."
+    ]
+  },
+  "fein": {
+    "value": "82-6150347",
+    "source_quote": "it's 82-6150347.",
+    "all_mentions": [
+      "it's 82-6150347."
+    ]
+  },
+  "address": {
+    "value": "400 Commerce Drive, Suite 210, Schaumburg, Illinois",
+    "source_quote": "Our office is at 400 Commerce Drive, Suite 210, Schaumburg, Illinois.",
+    "all_mentions": [
+      "Our office is at 400 Commerce Drive, Suite 210, Schaumburg, Illinois."
+    ]
+  },
+  "zip": {
+    "value": "60173",
+    "source_quote": "Zip code 60173.",
+    "all_mentions": [
+      "Zip code 60173."
+    ]
+  },
+  "industry_description": {
+    "value": "managed IT services for small businesses",
+    "source_quote": "We provide managed IT services for small businesses. Network setup, help desk support, cloud backups, that sort of thing.",
+    "all_mentions": [
+      "We provide managed IT services for small businesses. Network setup, help desk support, cloud backups, that sort of thing."
+    ]
+  },
+  "naics_code": {
+    "value": "541512",
+    "source_quote": "it's 541512.",
+    "all_mentions": [
+      "it's 541512."
+    ]
+  },
+  "years_in_business": {
+    "value": "11",
+    "source_quote": "We've been in business for 11 years.",
+    "all_mentions": [
+      "We've been in business for 11 years."
+    ]
+  },
+  "annual_revenue": {
+    "source_quote": "Revenue last year was about four point two million dollars.",
+    "value": "four point two million",
+    "all_mentions": [
+      "Revenue last year was about four point two million dollars."
+    ]
+  },
+  "employee_count": {
+    "source_quote": "We're about 40... actually, we just hired a bunch, so closer to 45 now.",
+    "value": "45",
+    "all_mentions": [
+      "We're about 40... actually, we just hired a bunch, so closer to 45 now."
+    ]
+  },
+  "coverage_types": {
+    "value": "cyber liability, professional liability, general liability",
+    "source_quote": "Mainly cyber liability and professional liability. And general liability, I suppose.",
+    "all_mentions": [
+      "Mainly cyber liability and professional liability. And general liability, I suppose."
+    ]
+  },
+  "effective_date": {
+    "source_quote": "We'd like it to start on February 15th, 2027.",
+    "value": "2027-02-15",
+    "all_mentions": [
+      "We'd like it to start on February 15th, 2027."
+    ]
+  },
+  "contact_name": {
+    "value": "Raj Patel",
+    "source_quote": "Morning Priya! Raj Patel here.",
+    "all_mentions": [
+      "Raj Patel"
+    ]
+  },
+  "contact_email": {
+    "value": "raj.patel@brightpathit.com",
+    "source_quote": "raj.patel@brightpathit.com.",
+    "all_mentions": [
+      "raj.patel@brightpathit.com."
+    ]
+  }
+}
