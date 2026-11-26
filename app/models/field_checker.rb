@@ -10,6 +10,10 @@ class FieldChecker
   POSITIVE_NUMBERS = %w[years_in_business annual_revenue employee_count].freeze
   # Fields where a different value inside a mention can be detected by code.
   STRUCTURED = (NUMERIC + %w[effective_date contact_email]).freeze
+  # Fields that need human interpretation and are never auto-verified.
+  INTERPRETATION = {
+    "years_in_business" => "Requires interpretation (durations and dates relative to the call)"
+  }.freeze
 
   MONTHS = Date::MONTHNAMES.compact.map(&:downcase).freeze
   EMAIL_PATTERN = /[A-Za-z0-9._%+\-]+@[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)+/
@@ -43,6 +47,12 @@ class FieldChecker
 
   # Returns the list of failed checks. Empty list means verified.
   def check(name, value, quote, mentions)
+    reasons = check_against_transcript(name, value, quote, mentions)
+    reasons << INTERPRETATION[name] if INTERPRETATION.key?(name)
+    reasons
+  end
+
+  def check_against_transcript(name, value, quote, mentions)
     return ["Not stated in call"] if value.blank?
 
     reasons = []

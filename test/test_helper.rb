@@ -13,7 +13,7 @@ module ActiveSupport
     fixtures :all
 
     # A submission built from the IT services sample fixture:
-    # 11 verified fields, annual_revenue and employee_count need approval.
+    # 10 verified fields; years_in_business, annual_revenue and employee_count need approval.
     def create_sample_submission
       sample = Sample.all.find { _1[:key] == "it_services" }
       Submission.create!(

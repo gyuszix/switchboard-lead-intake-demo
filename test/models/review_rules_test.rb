@@ -8,7 +8,7 @@ class ReviewRulesTest < ActiveSupport::TestCase
     @s.reload
     assert @s.verified_fields.all? { _1["resolution"] == "confirmed" }
     assert @s.needs_approval_fields.all? { _1["resolution"].nil? }
-    assert_equal 11, @s.resolved_count
+    assert_equal 10, @s.resolved_count
   end
 
   test "approve is blocked on an invalid value" do

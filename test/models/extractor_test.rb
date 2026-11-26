@@ -66,8 +66,8 @@ class ExtractorTest < ActiveSupport::TestCase
       fields = FieldChecker.new(s[:transcript], today: Date.new(2026, 11, 26)).categorise(Sample.fixture_for(s[:transcript]))
       [s[:key], fields.select { _1["category"] == "needs_approval" }.map { _1["name"] }]
     end
-    assert_empty by_key["bakery"]
-    assert_equal %w[fein contact_email], by_key["landscaping"]
-    assert_equal %w[annual_revenue employee_count], by_key["it_services"]
+    assert_equal %w[years_in_business], by_key["bakery"]
+    assert_equal %w[fein years_in_business contact_email], by_key["landscaping"]
+    assert_equal %w[years_in_business annual_revenue employee_count], by_key["it_services"]
   end
 end

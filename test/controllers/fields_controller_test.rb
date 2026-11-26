@@ -21,7 +21,7 @@ class FieldsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "text/vnd.turbo-stream.html", response.media_type
     assert_select "turbo-stream[action=replace][target=field_fein]"
     assert_select "turbo-stream[target=field_employee_count]", 0
-    assert_select "turbo-stream[target=review_status]", /11 of 13/
+    assert_select "turbo-stream[target=review_status]", /10 of 13/
     assert_nil @s.reload.field(:employee_count)["resolution"]
   end
 

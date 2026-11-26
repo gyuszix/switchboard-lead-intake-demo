@@ -44,6 +44,13 @@ class FieldCheckerTest < ActiveSupport::TestCase
 
   # --- failure reasons ------------------------------------------------------
 
+  test "years in business always needs approval even when every check passes" do
+    t = "Client: We have been in business for 9 years."
+    reasons = FieldChecker.new(t, today: TODAY).check("years_in_business", "9",
+      "We have been in business for 9 years.", ["We have been in business for 9 years."])
+    assert_equal ["Requires interpretation (durations and dates relative to the call)"], reasons
+  end
+
   test "null value is not stated in call" do
     assert_equal ["Not stated in call"], check("contact_email", nil, nil)
   end

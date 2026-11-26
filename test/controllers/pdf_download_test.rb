@@ -19,6 +19,7 @@ class PdfDownloadTest < ActionDispatch::IntegrationTest
   test "download works once every field is resolved" do
     @s.confirm_all_verified!
     @s.approve!(:employee_count)
+    @s.approve!(:years_in_business)
     @s.edit!(:annual_revenue, "4200000")
     get pdf_submission_path(@s)
     assert_response :success
