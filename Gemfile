@@ -66,3 +66,5 @@ group :test do
 end
 
 gem "prawn", ">= 2.4"
+
+gem "json_schemer", ">= 2.5"

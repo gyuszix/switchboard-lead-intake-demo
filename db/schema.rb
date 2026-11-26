@@ -10,12 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_26_193012) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_26_234016) do
   create_table "submissions", force: :cascade do |t|
     t.text "transcript", null: false
     t.json "fields", default: [], null: false
     t.boolean "used_fixtures", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "submission_json"
+    t.datetime "ready_at"
   end
 end
