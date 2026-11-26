@@ -42,6 +42,7 @@ class Extractor
     - When the transcript states a field, fill value with that stated value, written in the format given below.
     - all_mentions lists every verbatim quote in the transcript where this field is mentioned, including earlier or corrected values.
     - Copy every quote verbatim, character for character, from the transcript.
+    - Names and details may appear in either speaker's lines, including how the broker addresses the client (e.g. 'Hey Mike'). A contact name may be partial; return what is stated.
 
     Fields:
     #{FIELD_HINTS.map { |name, hint| "- #{name}: #{hint}" }.join("\n")}
