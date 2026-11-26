@@ -1,9 +1,12 @@
 <%# locals: (submission:) %>
 <div id="review_status" class="actions-row">
   <span class="counter"><strong><%= submission.resolved_count %> of <%= submission.total_count %></strong> fields resolved</span>
+  <% if submission.ready? %>
+    <%= link_to "Ready to send →", ready_submission_path(submission), class: "button" %>
+  <% end %>
   <% if submission.all_resolved? %>
-    <%= link_to "Download PDF", pdf_submission_path(submission), class: "button primary", data: { turbo: false } %>
+    <%= button_to "Approve and build submission", build_submission_path(submission), class: "button primary", form_class: "inline-form" %>
   <% else %>
-    <button type="button" class="button primary" disabled title="Resolve every field first">Download PDF</button>
+    <button type="button" class="button primary" disabled title="Resolve every field first">Approve and build submission</button>
   <% end %>
 </div>

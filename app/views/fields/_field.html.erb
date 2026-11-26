@@ -1,9 +1,9 @@
-<%# locals: (submission:, field:, error: nil) %>
+<%# locals: (submission:, field:, error: nil, build_errors: []) %>
 <% name = field["name"] %>
 <% verified = field["category"] == "verified" %>
-<% editable = verified || field["resolution"].nil? %>
+<% undecided = !verified && field["resolution"].nil? %>
 <% editing = error.present? && params.key?(:value) %>
-<%= turbo_frame_tag field_frame_id(name), class: "field-row", data: { controller: "edit-toggle" } do %>
+<%= turbo_frame_tag field_frame_id(name), class: ["field-row", ("build-error" if build_errors.any?)], data: { controller: "edit-toggle" } do %>
   <div class="field-name">
     <%= field_label(name) %>
     <% if verified %>
@@ -44,18 +44,18 @@
   <% end %>
 
   <% if error %><p class="error"><%= error %></p><% end %>
+  <% build_errors.each do |message| %><p class="error"><%= message %></p><% end %>
 
   <% if field["resolution"] %>
     <div class="resolution">✓ <%= ApplicationHelper::RESOLUTION_LABELS[field["resolution"]] %></div>
   <% end %>
 
-  <% if editable %>
-    <div class="actions-row <%= "hidden" if editing %>" data-edit-toggle-target="actions">
-      <% unless verified %>
+  <div class="actions-row <%= "hidden" if editing %>" data-edit-toggle-target="actions">
+      <% if undecided %>
         <%= button_to "Approve as-is", approve_submission_field_path(submission, name), method: :patch, class: "button", form_class: "inline-form" %>
       <% end %>
       <button type="button" class="button" data-action="edit-toggle#toggle">Edit</button>
-      <% unless verified %>
+      <% if undecided %>
         <%= button_to "Mark not provided", not_provided_submission_field_path(submission, name), method: :patch, class: "button", form_class: "inline-form" %>
       <% end %>
     </div>
@@ -66,5 +66,4 @@
       <%= f.submit "Save", class: "button primary" %>
       <button type="button" class="button" data-action="edit-toggle#toggle">Cancel</button>
     <% end %>
-  <% end %>
 <% end %>

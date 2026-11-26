@@ -20,13 +20,27 @@
 <% end %>
 <% if flash[:alert] %><p class="error"><%= flash[:alert] %></p><% end %>
 
+<% build_errors = (@build_errors || []).group_by(&:field).transform_values { _1.map(&:message) } %>
+<% if build_errors.any? %>
+  <div class="error-banner" role="alert">
+    <strong>The submission could not be built.</strong> Fix these fields and try again:
+    <ul>
+      <% build_errors.each do |name, messages| %>
+        <% messages.each do |message| %>
+          <li><%= ApplicationHelper::FIELD_LABELS.fetch(name) { name.humanize } %>: <%= message %></li>
+        <% end %>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
 <section class="section">
   <div class="section-head">
     <h2><span class="badge green">Verified</span> Proven against the transcript</h2>
     <%= render "submissions/confirm_all", submission: @submission %>
   </div>
   <% @submission.verified_fields.each do |field| %>
-    <%= render "fields/field", submission: @submission, field: field %>
+    <%= render "fields/field", submission: @submission, field: field, build_errors: build_errors.fetch(field["name"], []) %>
   <% end %>
   <% if @submission.verified_fields.empty? %><p class="empty-section">No fields could be verified.</p><% end %>
 </section>
@@ -36,7 +50,7 @@
     <h2><span class="badge amber">Needs approval</span> A broker must decide</h2>
   </div>
   <% @submission.needs_approval_fields.each do |field| %>
-    <%= render "fields/field", submission: @submission, field: field %>
+    <%= render "fields/field", submission: @submission, field: field, build_errors: build_errors.fetch(field["name"], []) %>
   <% end %>
   <% if @submission.needs_approval_fields.empty? %><p class="empty-section">Nothing needs approval.</p><% end %>
 </section>

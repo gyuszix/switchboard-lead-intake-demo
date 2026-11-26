@@ -32,16 +32,25 @@ class SubmissionsController < ApplicationController
     render_review(submission, submission.verified_fields.map { _1["name"] })
   end
 
-  # The gate: no PDF until every field is resolved, whatever the UI shows.
-  def pdf
-    submission = Submission.find(params[:id])
-    unless submission.all_resolved?
-      return render plain: "Every field must be resolved before the PDF can be downloaded.",
+  # Build the submission JSON from the approved values, then validate it.
+  # Same gate as the review: nothing is built until every field is resolved.
+  def build
+    @submission = Submission.find(params[:id])
+    unless @submission.all_resolved?
+      return render plain: "Every field must be resolved before the submission can be built.",
                     status: :unprocessable_entity
     end
 
-    send_data SubmissionPdf.new(submission).render,
-      filename: "commercial-insurance-application-#{submission.id}.pdf",
-      type: "application/pdf", disposition: "attachment"
+    @build_errors = @submission.build_submission!
+    if @build_errors.empty?
+      redirect_to ready_submission_path(@submission), status: :see_other
+    else
+      render :show, status: :unprocessable_entity
+    end
+  end
+
+  def ready
+    @submission = Submission.find(params[:id])
+    redirect_to @submission unless @submission.ready?
   end
 end

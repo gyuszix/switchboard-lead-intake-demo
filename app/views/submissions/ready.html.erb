@@ -1,0 +1,16 @@
+<% content_for :title, "Ready to send ##{@submission.id}" %>
+
+<div class="review-header">
+  <h1>Ready to send: submission #<%= @submission.id %></h1>
+  <%= link_to "← Back to review", submission_path(@submission), class: "button" %>
+</div>
+
+<p class="counter">Built and validated against the submission schema at <%= @submission.ready_at.utc.iso8601 %>. This record is the only thing that will leave the app.</p>
+
+<pre class="submission-json"><%= JSON.pretty_generate(@submission.submission_json) %></pre>
+
+<div class="actions-row">
+  <% ["Email PDF to carrier", "Carrier portal (bot)", "Carrier API"].each do |channel| %>
+    <button type="button" class="button" disabled><%= channel %> <span class="coming-next">coming next</span></button>
+  <% end %>
+</div>
