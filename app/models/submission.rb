@@ -47,9 +47,11 @@ class Submission < ApplicationRecord
   def all_resolved? = fields.any? && fields.all? { |f| f["resolution"].present? }
 
   # --- Review rules -----------------------------------------------------
-  # Each returns nil on success or an error message. Resolutions are final.
+  # Each returns nil on success or an error message. Resolutions are final,
+  # except that verified fields stay editable (confirmed -> edited).
 
-  # Confirms every unresolved verified field. Never touches needs_approval.
+  # Confirms every unresolved verified field. Never touches needs_approval
+  # fields or verified fields the broker already edited.
   def confirm_all_verified!
     verified_fields.each do |f|
       update_field(f["name"], "resolution" => "confirmed") if f["resolution"].nil?
@@ -70,13 +72,15 @@ class Submission < ApplicationRecord
   end
 
   # Replaces the value with the broker's, which must pass format validation.
+  # original_value keeps the first (extracted) value across repeated edits.
   def edit!(name, new_value)
     field = field(name)
     new_value = FieldChecker.normalize_value(name, new_value)
-    error = review_error(field) || FieldChecker.format_error(name, new_value)
+    error = edit_error(field) || FieldChecker.format_error(name, new_value)
     return error if error
 
-    update_field(name, "original_value" => field["value"], "value" => new_value, "resolution" => "edited")
+    update_field(name, "original_value" => field["original_value"] || field["value"],
+                       "value" => new_value, "resolution" => "edited")
     save!
     nil
   end
@@ -93,6 +97,10 @@ class Submission < ApplicationRecord
   end
 
   private
+
+  def edit_error(field)
+    review_error(field) unless field["category"] == "verified"
+  end
 
   def review_error(field)
     return "Only fields that need approval can be changed" unless field["category"] == "needs_approval"

@@ -42,9 +42,42 @@ class ReviewRulesTest < ActiveSupport::TestCase
     assert_nil field["value"]
   end
 
-  test "verified fields cannot be approved, edited or cleared" do
-    assert_equal "Only fields that need approval can be changed", @s.edit!(:fein, "12-3456789")
+  test "verified fields cannot be approved or cleared" do
+    assert_equal "Only fields that need approval can be changed", @s.approve!(:fein)
     assert_equal "Only fields that need approval can be changed", @s.mark_not_provided!(:fein)
+  end
+
+  test "editing a verified field sets edited and keeps original_value" do
+    assert_nil @s.edit!(:fein, "12-3456789")
+    field = @s.reload.field(:fein)
+    assert_equal "edited", field["resolution"]
+    assert_equal "12-3456789", field["value"]
+    assert_equal "82-6150347", field["original_value"]
+    assert_equal "verified", field["category"]
+
+    assert_nil @s.edit!(:fein, "98-7654321")
+    assert_equal "82-6150347", @s.reload.field(:fein)["original_value"]
+  end
+
+  test "editing a confirmed verified field changes it to edited" do
+    @s.confirm_all_verified!
+    assert_nil @s.edit!(:zip, "60174")
+    assert_equal "edited", @s.reload.field(:zip)["resolution"]
+  end
+
+  test "confirm all does not overwrite edited verified fields" do
+    @s.edit!(:zip, "60174")
+    @s.confirm_all_verified!
+    @s.reload
+    assert_equal "edited", @s.field(:zip)["resolution"]
+    assert_equal "confirmed", @s.field(:fein)["resolution"]
+  end
+
+  test "invalid edit of a verified field is rejected" do
+    assert_equal "ZIP must be 5 digits", @s.edit!(:zip, "601")
+    field = @s.reload.field(:zip)
+    assert_nil field["resolution"]
+    assert_equal "60173", field["value"]
   end
 
   test "resolutions are final" do
