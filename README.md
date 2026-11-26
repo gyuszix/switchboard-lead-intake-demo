@@ -2,24 +2,24 @@
 
 An AI extracts a commercial insurance intake form from a call transcript, but the AI never gets the final say.
 
-Every field is either **proven correct by deterministic code against the transcript**, or **approved by a human broker**. Only then can a clean, standardised PDF be downloaded.
+Every field is either **proven correct by deterministic code against the transcript**, or **approved by a human broker**. Only then is a submission built, and it must pass a JSON Schema before it can be sent anywhere.
 
-## How it works
+## Pipeline
 
-1. Paste a call transcript (or load one of three samples) and click **Extract**.
-2. `Extractor` sends it to a local Ollama model, which returns, for each of 13 fields, a `value`, a `source_quote` and `all_mentions` (every verbatim quote mentioning the field).
-3. `FieldChecker` sorts each field into **Verified** or **Needs approval**, with a plain-English reason for every check that failed.
-4. The broker reviews: one click confirms all verified fields; each needs-approval field is approved as-is, edited, or marked not provided.
-5. Once all 13 fields are resolved, **Download PDF** produces a standardised Commercial Insurance Application.
+1. **Agent extraction:** transcript → raw JSON. `Extractor` sends the transcript to a local Ollama model, which returns, for each of 13 fields, a `value`, a `source_quote` and `all_mentions` (every verbatim quote mentioning the field). `FieldChecker` sorts each field into **Verified** or **Needs approval**, with a plain-English reason for every check that failed.
+2. **Broker review:** one click confirms all verified fields; each needs-approval field is approved as-is, edited, or marked not provided. Any field can be edited.
+3. **Build:** once all 13 fields are resolved, **Approve and build submission** turns the broker-approved values into the submission JSON (`SubmissionBuilder`): integers for numbers, an array for coverage types, `YYYY-MM-DD` for the date, `null` for "Not provided". A value that can't be converted is kept raw, never guessed or fixed.
+4. **Deterministic check:** `SubmissionValidator` validates the submission JSON against `config/schemas/submission_v1.json`. If it fails, nothing is saved: the review page lists each failing field in plain English and highlights its row. If it passes, the submission is saved and shown on the **Ready to send** page.
+5. **Channel choice:** email PDF / carrier portal bot / carrier API. Placeholders only, not built yet.
+
+The raw JSON is the model's claim. The submission JSON is the broker-approved record, and is the only thing that will ever leave the app.
 
 ## Running it
 
 Requirements: Ruby 4.0, Rails 8, and [Ollama](https://ollama.com) with `granite4.2:8b` pulled.
 
 ```sh
-bundle install
-bin/rails db:prepare
-bin/rails server        # http://localhost:3000
+./run.sh                # installs gems, prepares the database, starts http://localhost:3000
 bin/rails test          # fast and offline; never calls Ollama
 ```
 
@@ -54,9 +54,22 @@ Review rules:
 - **Confirm all verified** resolves every verified field in one click and never touches needs-approval fields.
 - **Approve as-is** is allowed only if the value passes format validation.
 - **Edit** re-validates the new value and keeps the previous one in `original_value`.
-- **Mark not provided** clears the value; the PDF prints "Not provided".
-- Resolutions are final. Verified fields can only be confirmed.
-- The download button is disabled until all fields are resolved, and the server refuses the PDF with **422** regardless of what the UI shows.
+- **Mark not provided** clears the value. The schema requires every field, so a "Not provided" field blocks the build until the broker edits in a value.
+- Approve and Mark not provided are one-time decisions. Edit is available on every field, resolved or not.
+- **Approve and build submission** is disabled until all fields are resolved, and the server refuses the build with **422** regardless of what the UI shows.
+- Editing any field after a submission is built clears it; the broker must build again.
+
+## Submission schema
+
+`config/schemas/submission_v1.json` (JSON Schema 2020-12) is the contract:
+
+- every field required and non-null; `additionalProperties: false` at every level
+- FEIN `^\d{2}-\d{7}$`, NAICS `^\d{6}$`, ZIP `^\d{5}$`
+- annual revenue, employee count, years in business: integers, minimum 1
+- coverage types: a non-empty array of non-empty strings
+- effective date `format: date`, contact email `format: email`
+
+The schema checks format only. Value checks like "date not in the past" stay in the review stage.
 
 ## Why
 
@@ -66,9 +79,15 @@ That's why the model is never asked for a confidence score: a model's opinion of
 
 The samples show this:
 
-- **Bakery (clean):** everything is stated plainly and every field verifies.
+- **Bakery (clean):** everything is stated plainly, and every field verifies except years in business, which always needs a broker.
 - **Landscaping (misheard FEIN):** the FEIN is read out awkwardly, so the extracted value has the wrong digit count and fails format validation. The email is never mentioned. Both go to the broker.
 - **IT services (messy):** the employee count is corrected mid-call ("about 40... closer to 45 now"), so the mentions conflict. Revenue is given in words, so code can't prove the number. Both go to the broker.
+
+The pipeline keeps three roles apart:
+
+- **The model's output is a claim.** It is never sent anywhere.
+- **The broker approves the values.** Code proves what it can against the transcript; a human decides the rest.
+- **The JSON Schema is the contract.** Whatever channel carries a submission to a carrier (email PDF, portal bot or API) can rely on the same validated, typed record, without re-checking the transcript or trusting the model.
 
 The checks are conservative on purpose. A false "needs approval" costs a broker a click; a false "verified" puts wrong data on an application.
 
@@ -79,7 +98,9 @@ Fields that require interpretation (like durations relative to the call date) ar
 - `app/models/extractor.rb`: all Ollama code (Net::HTTP, JSON schema, defensive parsing, fixture fallback)
 - `app/models/field_checker.rb`: the categorisation rules and format validation
 - `app/models/submission.rb`: the field structure and review rules
-- `app/models/submission_pdf.rb`: the Prawn PDF
+- `app/models/submission_builder.rb`: approved values → typed submission JSON
+- `app/models/submission_validator.rb` and `config/schemas/submission_v1.json`: the schema check and its plain-English errors
+- `app/models/submission_pdf.rb`: the Prawn PDF, kept for the future email channel
 - `config/samples/`: sample transcripts and fixture extractions
 
 ## Next steps (not built)
