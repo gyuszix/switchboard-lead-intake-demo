@@ -1,6 +1,32 @@
-<h1>Review submission #<%= @submission.id %></h1>
-<ul>
-  <% @submission.fields.each do |field| %>
-    <li><%= field["name"] %>: <%= field["value"] %> (<%= field["category"] %>)</li>
+<% content_for :title, "Review submission ##{@submission.id}" %>
+
+<div class="review-header">
+  <h1>Review submission #<%= @submission.id %></h1>
+  <%= render "submissions/status", submission: @submission %>
+</div>
+
+<% if @submission.used_fixtures %>
+  <p class="notice">Ollama was unreachable, so these results come from built-in sample fixtures, not a live extraction.</p>
+<% end %>
+<% if flash[:alert] %><p class="error"><%= flash[:alert] %></p><% end %>
+
+<section class="section">
+  <div class="section-head">
+    <h2><span class="badge green">Verified</span> Proven against the transcript</h2>
+    <%= render "submissions/confirm_all", submission: @submission %>
+  </div>
+  <% @submission.verified_fields.each do |field| %>
+    <%= render "fields/field", submission: @submission, field: field %>
   <% end %>
-</ul>
+  <% if @submission.verified_fields.empty? %><p class="empty-section">No fields could be verified.</p><% end %>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <h2><span class="badge amber">Needs approval</span> A broker must decide</h2>
+  </div>
+  <% @submission.needs_approval_fields.each do |field| %>
+    <%= render "fields/field", submission: @submission, field: field %>
+  <% end %>
+  <% if @submission.needs_approval_fields.empty? %><p class="empty-section">Nothing needs approval.</p><% end %>
+</section>

@@ -1,4 +1,6 @@
 class SubmissionsController < ApplicationController
+  include ReviewStreams
+
   def new
     sample = Sample.all.find { _1[:key] == params[:sample] }
     @transcript = sample&.dig(:transcript).to_s
@@ -22,5 +24,11 @@ class SubmissionsController < ApplicationController
 
   def show
     @submission = Submission.find(params[:id])
+  end
+
+  def confirm_all
+    submission = Submission.find(params[:id])
+    submission.confirm_all_verified!
+    render_review(submission, submission.verified_fields.map { _1["name"] })
   end
 end

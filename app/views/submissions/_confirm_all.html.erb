@@ -1,0 +1,9 @@
+<%# locals: (submission:) %>
+<div id="confirm_all">
+  <% pending = submission.verified_fields.count { _1["resolution"].nil? } %>
+  <% if pending.positive? %>
+    <%= button_to "Confirm all verified", confirm_all_submission_path(submission), method: :patch, class: "button primary" %>
+  <% elsif submission.verified_fields.any? %>
+    <span class="resolution">✓ All confirmed</span>
+  <% end %>
+</div>

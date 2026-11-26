@@ -121,3 +121,6 @@ textarea { min-height: 360px; font-family: ui-monospace, Menlo, monospace; font-
 .hidden { display: none; }
 .empty-section { padding: 12px 16px; color: var(--muted); }
 .paste-form { margin-top: 16px; }
+.field-row { display: block; }
+.section-head h2 { display: flex; align-items: center; gap: 4px; font-size: 1rem; }
+.section-head form { margin: 0; }

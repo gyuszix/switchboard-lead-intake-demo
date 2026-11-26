@@ -1,0 +1,45 @@
+<%# locals: (submission:, field:, error: nil) %>
+<% name = field["name"] %>
+<% editing = error.present? && params.key?(:value) %>
+<%= turbo_frame_tag field_frame_id(name), class: "field-row", data: { controller: "edit-toggle" } do %>
+  <div class="field-name"><%= field_label(name) %></div>
+
+  <% if field["value"].present? %>
+    <div class="field-value"><%= field["value"] %></div>
+  <% else %>
+    <div class="field-value empty">No value</div>
+  <% end %>
+
+  <% if field["original_value"].present? %>
+    <div class="counter">Extracted: <%= field["original_value"] %></div>
+  <% end %>
+
+  <% if field["source_quote"].present? %>
+    <blockquote class="quote">“<%= field["source_quote"] %>”</blockquote>
+  <% end %>
+
+  <% if field["category"] == "needs_approval" && field["reasons"].any? %>
+    <ul class="reasons">
+      <% field["reasons"].each do |reason| %><li><%= reason %></li><% end %>
+    </ul>
+  <% end %>
+
+  <% if error %><p class="error"><%= error %></p><% end %>
+
+  <% if field["resolution"] %>
+    <div class="resolution">✓ <%= ApplicationHelper::RESOLUTION_LABELS[field["resolution"]] %></div>
+  <% elsif field["category"] == "needs_approval" %>
+    <div class="actions-row <%= "hidden" if editing %>" data-edit-toggle-target="actions">
+      <%= button_to "Approve as-is", approve_submission_field_path(submission, name), method: :patch, class: "button", form_class: "inline-form" %>
+      <button type="button" class="button" data-action="edit-toggle#toggle">Edit</button>
+      <%= button_to "Mark not provided", not_provided_submission_field_path(submission, name), method: :patch, class: "button", form_class: "inline-form" %>
+    </div>
+    <%= form_with url: submission_field_path(submission, name), method: :patch,
+          class: "edit-form #{"hidden" unless editing}", data: { edit_toggle_target: "form" } do |f| %>
+      <%= f.text_field :value, value: editing ? params[:value] : field["value"],
+            aria: { label: "New value for #{field_label(name)}" }, data: { edit_toggle_target: "input" } %>
+      <%= f.submit "Save", class: "button primary" %>
+      <button type="button" class="button" data-action="edit-toggle#toggle">Cancel</button>
+    <% end %>
+  <% end %>
+<% end %>
