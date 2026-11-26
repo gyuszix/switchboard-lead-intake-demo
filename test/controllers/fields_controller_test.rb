@@ -49,6 +49,23 @@ class FieldsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "not_provided", @s.reload.field(:employee_count)["resolution"]
   end
 
+  test "verified rows have an edit action and a verified badge" do
+    get submission_path(@s)
+    assert_select "#field_fein .badge.green", "Verified"
+    assert_select "#field_fein button", "Edit"
+    assert_select "#field_fein form[action=?]", approve_submission_field_path(@s, "fein"), 0
+  end
+
+  test "editing a verified field swaps the badge and keeps the quote" do
+    patch submission_field_path(@s, "zip"), params: { value: "60174" }, headers: stream_headers
+    assert_response :success
+    assert_select "turbo-stream[target=field_zip]" do
+      assert_select ".badge.blue", "Edited by broker"
+      assert_select ".badge.green", 0
+      assert_select ".quote", /60173/
+    end
+  end
+
   test "unknown field is 404" do
     patch approve_submission_field_path(@s, "favourite_colour"), headers: stream_headers
     assert_response :not_found

@@ -10,6 +10,8 @@
   --green-bg: #dafbe1;
   --amber: #9a6700;
   --amber-bg: #fff8c5;
+  --blue: #0550ae;
+  --blue-bg: #ddf4ff;
   --red: #cf222e;
 }
 
@@ -107,6 +109,8 @@ textarea { min-height: 360px; font-family: ui-monospace, Menlo, monospace; font-
 }
 .badge.green { background: var(--green-bg); color: var(--green); }
 .badge.amber { background: var(--amber-bg); color: var(--amber); }
+.badge.blue { background: var(--blue-bg); color: var(--blue); }
+.field-name .badge { margin-left: 6px; }
 
 .field-row { padding: 12px 16px; border-bottom: 1px solid var(--border); }
 .field-row:last-child { border-bottom: 0; }

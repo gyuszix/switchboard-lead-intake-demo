@@ -1,8 +1,19 @@
 <%# locals: (submission:, field:, error: nil) %>
 <% name = field["name"] %>
+<% verified = field["category"] == "verified" %>
+<% editable = verified || field["resolution"].nil? %>
 <% editing = error.present? && params.key?(:value) %>
 <%= turbo_frame_tag field_frame_id(name), class: "field-row", data: { controller: "edit-toggle" } do %>
-  <div class="field-name"><%= field_label(name) %></div>
+  <div class="field-name">
+    <%= field_label(name) %>
+    <% if verified %>
+      <% if field["resolution"] == "edited" %>
+        <span class="badge blue">Edited by broker</span>
+      <% else %>
+        <span class="badge green">Verified</span>
+      <% end %>
+    <% end %>
+  </div>
 
   <% if field["value"].present? %>
     <div class="field-value"><%= field["value"] %></div>
@@ -28,11 +39,17 @@
 
   <% if field["resolution"] %>
     <div class="resolution">✓ <%= ApplicationHelper::RESOLUTION_LABELS[field["resolution"]] %></div>
-  <% elsif field["category"] == "needs_approval" %>
+  <% end %>
+
+  <% if editable %>
     <div class="actions-row <%= "hidden" if editing %>" data-edit-toggle-target="actions">
-      <%= button_to "Approve as-is", approve_submission_field_path(submission, name), method: :patch, class: "button", form_class: "inline-form" %>
+      <% unless verified %>
+        <%= button_to "Approve as-is", approve_submission_field_path(submission, name), method: :patch, class: "button", form_class: "inline-form" %>
+      <% end %>
       <button type="button" class="button" data-action="edit-toggle#toggle">Edit</button>
-      <%= button_to "Mark not provided", not_provided_submission_field_path(submission, name), method: :patch, class: "button", form_class: "inline-form" %>
+      <% unless verified %>
+        <%= button_to "Mark not provided", not_provided_submission_field_path(submission, name), method: :patch, class: "button", form_class: "inline-form" %>
+      <% end %>
     </div>
     <%= form_with url: submission_field_path(submission, name), method: :patch,
           class: "edit-form #{"hidden" unless editing}", data: { edit_toggle_target: "form" } do |f| %>
