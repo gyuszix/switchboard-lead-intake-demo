@@ -72,6 +72,8 @@ The samples show this:
 
 The checks are conservative on purpose. A false "needs approval" costs a broker a click; a false "verified" puts wrong data on an application.
 
+Fields that require interpretation (like durations relative to the call date) are never auto-verified.
+
 ## Code map
 
 - `app/models/extractor.rb`: all Ollama code (Net::HTTP, JSON schema, defensive parsing, fixture fallback)
