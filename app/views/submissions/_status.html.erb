@@ -1,4 +1,9 @@
 <%# locals: (submission:) %>
 <div id="review_status" class="actions-row">
   <span class="counter"><strong><%= submission.resolved_count %> of <%= submission.total_count %></strong> fields resolved</span>
+  <% if submission.all_resolved? %>
+    <%= link_to "Download PDF", pdf_submission_path(submission), class: "button primary", data: { turbo: false } %>
+  <% else %>
+    <button type="button" class="button primary" disabled title="Resolve every field first">Download PDF</button>
+  <% end %>
 </div>

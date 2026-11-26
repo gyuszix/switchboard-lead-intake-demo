@@ -31,4 +31,17 @@ class SubmissionsController < ApplicationController
     submission.confirm_all_verified!
     render_review(submission, submission.verified_fields.map { _1["name"] })
   end
+
+  # The gate: no PDF until every field is resolved, whatever the UI shows.
+  def pdf
+    submission = Submission.find(params[:id])
+    unless submission.all_resolved?
+      return render plain: "Every field must be resolved before the PDF can be downloaded.",
+                    status: :unprocessable_entity
+    end
+
+    send_data SubmissionPdf.new(submission).render,
+      filename: "commercial-insurance-application-#{submission.id}.pdf",
+      type: "application/pdf", disposition: "attachment"
+  end
 end
