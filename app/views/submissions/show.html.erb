@@ -1,0 +1,6 @@
+<h1>Review submission #<%= @submission.id %></h1>
+<ul>
+  <% @submission.fields.each do |field| %>
+    <li><%= field["name"] %>: <%= field["value"] %> (<%= field["category"] %>)</li>
+  <% end %>
+</ul>

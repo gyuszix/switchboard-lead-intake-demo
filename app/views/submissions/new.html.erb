@@ -1,0 +1,17 @@
+<h1>New intake</h1>
+<p class="counter">Paste a call transcript. The AI will extract the intake form; code then checks every field against the transcript.</p>
+
+<div class="actions-row">
+  <span class="counter">Load sample:</span>
+  <% Sample.all.each do |sample| %>
+    <%= link_to sample[:title], root_path(sample: sample[:key]), class: "button" %>
+  <% end %>
+</div>
+
+<%= form_with url: submissions_path, class: "paste-form" do |f| %>
+  <% if @error %><p class="error"><%= @error %></p><% end %>
+  <%= f.text_area :transcript, value: @transcript, placeholder: "Broker: ...\nClient: ...", aria: { label: "Transcript" } %>
+  <div class="actions-row">
+    <%= f.submit "Extract", class: "button primary", data: { turbo_submits_with: "Extracting… (can take a minute)" } %>
+  </div>
+<% end %>

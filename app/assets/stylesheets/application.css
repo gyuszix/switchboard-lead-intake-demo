@@ -120,3 +120,4 @@ textarea { min-height: 360px; font-family: ui-monospace, Menlo, monospace; font-
 .edit-form { display: flex; gap: 8px; margin-top: 8px; }
 .hidden { display: none; }
 .empty-section { padding: 12px 16px; color: var(--muted); }
+.paste-form { margin-top: 16px; }
