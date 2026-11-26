@@ -136,6 +136,13 @@ class FieldCheckerTest < ActiveSupport::TestCase
     assert_includes check("coverage_types", "general liability, property", quote), "Value not in quote"
   end
 
+  test "line index uses normalised matching" do
+    lines = ["Broker: Hi.", "Client: Our FEIN is 12-3456789."]
+    assert_equal 1, FieldChecker.line_index(lines, "our fein is 12 3456789")
+    assert_nil FieldChecker.line_index(lines, "not here")
+    assert_nil FieldChecker.line_index(lines, nil)
+  end
+
   # --- conflicting mentions -------------------------------------------------
 
   test "conflicting numeric mention" do

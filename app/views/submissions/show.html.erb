@@ -1,9 +1,19 @@
 <% content_for :title, "Review submission ##{@submission.id}" %>
+<div data-controller="transcript">
 
 <div class="review-header">
   <h1>Review submission #<%= @submission.id %></h1>
   <%= render "submissions/status", submission: @submission %>
 </div>
+
+<details class="transcript" data-transcript-target="panel">
+  <summary>Show full transcript</summary>
+  <div class="transcript-lines">
+    <% transcript_lines(@submission).each_with_index do |line, i| %>
+      <div class="transcript-line" id="<%= transcript_line_id(i) %>"><%= transcript_line(line) %></div>
+    <% end %>
+  </div>
+</details>
 
 <% if @submission.used_fixtures %>
   <p class="notice">Ollama was unreachable, so these results come from built-in sample fixtures, not a live extraction.</p>
@@ -30,3 +40,4 @@
   <% end %>
   <% if @submission.needs_approval_fields.empty? %><p class="empty-section">Nothing needs approval.</p><% end %>
 </section>
+</div>

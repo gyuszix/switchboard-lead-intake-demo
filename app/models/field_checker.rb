@@ -119,6 +119,23 @@ class FieldChecker
     value
   end
 
+  # Lowercase, punctuation to spaces, collapse whitespace.
+  def self.normalize(text)
+    text.to_s.downcase.gsub(/[^a-z0-9@]+/, " ").squish
+  end
+
+  # True if phrase appears in text after normalising both, on word boundaries.
+  def self.contains?(text, phrase)
+    p = normalize(phrase)
+    p.present? && " #{normalize(text)} ".include?(" #{p} ")
+  end
+
+  # Index of the first line containing the quote, or nil.
+  def self.line_index(lines, quote)
+    return nil if quote.blank?
+    lines.index { contains?(_1, quote) }
+  end
+
   def self.parse_iso_date(value)
     return nil unless value.to_s.match?(/\A\d{4}-\d{2}-\d{2}\z/)
     Date.iso8601(value.to_s)
@@ -128,10 +145,7 @@ class FieldChecker
 
   private
 
-  # Lowercase, punctuation to spaces, collapse whitespace.
-  def normalize(text)
-    text.to_s.downcase.gsub(/[^a-z0-9@]+/, " ").squish
-  end
+  def normalize(text) = self.class.normalize(text)
 
   def in_transcript?(quote)
     q = normalize(quote)
@@ -154,10 +168,7 @@ class FieldChecker
     end
   end
 
-  def phrase_in?(phrase, text)
-    p = normalize(phrase)
-    p.present? && " #{normalize(text)} ".include?(" #{p} ")
-  end
+  def phrase_in?(phrase, text) = self.class.contains?(text, phrase)
 
   # Only structured fields can be checked for a different value.
   def conflicts?(name, value, mention)

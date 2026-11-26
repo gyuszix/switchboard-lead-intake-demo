@@ -15,6 +15,26 @@ class FieldsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-controller=edit-toggle]", 13
   end
 
+  test "review page renders the transcript and links quotes to their line" do
+    get submission_path(@s)
+    lines = @s.transcript.split("\n")
+    assert_select "details.transcript:not([open]) summary", "Show full transcript"
+    assert_select ".transcript-line", lines.size
+    assert_select "#line-1 strong", "Broker:"
+
+    fein_line = "line-#{lines.index { _1.include?("82-6150347") } + 1}"
+    assert_select "#field_fein a.quote-link[href=?][data-transcript-line-param=?]", "##{fein_line}", fein_line
+    assert_select "##{fein_line}", /82-6150347/
+  end
+
+  test "a quote with no matching line is not clickable" do
+    @s.update_field(:zip, "source_quote" => "a quote that is nowhere in the call")
+    @s.save!
+    get submission_path(@s)
+    assert_select "#field_zip .quote", /nowhere in the call/
+    assert_select "#field_zip a.quote-link", 0
+  end
+
   test "confirm all responds with streams for verified rows and counter" do
     patch confirm_all_submission_path(@s), headers: stream_headers
     assert_response :success

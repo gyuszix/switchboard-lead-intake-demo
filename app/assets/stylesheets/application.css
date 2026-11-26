@@ -128,3 +128,27 @@ textarea { min-height: 360px; font-family: ui-monospace, Menlo, monospace; font-
 .field-row { display: block; }
 .section-head h2 { display: flex; align-items: center; gap: 4px; font-size: 1rem; }
 .section-head form { margin: 0; }
+
+/* Transcript panel */
+.transcript {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+.transcript summary { padding: 10px 16px; cursor: pointer; font-weight: 600; }
+.transcript-lines {
+  max-height: 40vh;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+.transcript-line { padding: 2px 4px; border-radius: 4px; min-height: 1.5em; }
+.transcript-line.highlight { animation: line-flash 2s ease-out; }
+@keyframes line-flash {
+  from { background: var(--amber-bg); }
+  to { background: transparent; }
+}
+.quote-link { color: inherit; text-decoration: underline dotted; }
+.quote-link:hover { color: var(--primary); }

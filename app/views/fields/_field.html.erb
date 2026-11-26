@@ -26,7 +26,15 @@
   <% end %>
 
   <% if field["source_quote"].present? %>
-    <blockquote class="quote">“<%= field["source_quote"] %>”</blockquote>
+    <% line_id = quote_line_id(submission, field["source_quote"]) %>
+    <blockquote class="quote">
+      <% if line_id %>
+        <%= link_to "“#{field["source_quote"]}”", "##{line_id}", class: "quote-link",
+              data: { turbo: false, action: "transcript#show", transcript_line_param: line_id } %>
+      <% else %>
+        “<%= field["source_quote"] %>”
+      <% end %>
+    </blockquote>
   <% end %>
 
   <% if field["category"] == "needs_approval" && field["reasons"].any? %>
