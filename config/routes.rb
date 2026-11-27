@@ -11,5 +11,10 @@ Rails.application.routes.draw do
     end
   end
 
+  # Fake carrier systems the channels talk to over real HTTP.
+  namespace :mock_carriers do
+    post "acme/api/v1/quotes", to: "acme#create", as: :acme_quotes
+  end
+
   get "up" => "rails/health#show", as: :rails_health_check
 end
