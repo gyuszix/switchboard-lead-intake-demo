@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # One-time setup on a new Mac: ./install.sh
 # Sets up Ruby 4.0, Ollama and the Granite model, then the gems and database.
+# It doesn't leave Ollama running: ./run.sh starts it when you run the app.
 # Homebrew is optional: it's used if installed, offered if not, and without it
 # Ruby comes from mise or rbenv and Ollama from its own download.
 # Safe to re-run: anything already installed is skipped.
@@ -96,21 +97,14 @@ if have_ollama; then
     export PATH="/Applications/Ollama.app/Contents/Resources:$PATH"
   fi
 
-  step "Serving Ollama"
-  if ollama_up; then
-    echo "    Already running at $OLLAMA_URL."
-  else
-    if [[ -d /Applications/Ollama.app ]]; then
-      open -a Ollama                     # the app serves in the background
-    elif use_brew && brew list ollama > /dev/null 2>&1; then
-      brew services start ollama         # now and at every login
-    else
-      nohup ollama serve > "${TMPDIR:-/tmp}/ollama.log" 2>&1 &
-      echo "    Started 'ollama serve' for this session; run it again after a restart."
-    fi
+  # Pulling needs a running server. Serving the app is ./run.sh's job, so a
+  # server started here only lasts for the pull.
+  if ! ollama_up; then
+    ollama serve > "${TMPDIR:-/tmp}/ollama-install.log" 2>&1 &
+    PULL_SERVER=$!
+    trap 'kill "$PULL_SERVER" 2> /dev/null || true' EXIT
     for _ in $(seq 1 30); do ollama_up && break; sleep 1; done
-    ollama_up || { echo "    Ollama did not start. Try 'ollama serve' in another terminal, then re-run."; exit 1; }
-    echo "    Running at $OLLAMA_URL."
+    ollama_up || { echo "    Could not start Ollama to pull the model (log: ${TMPDIR:-/tmp}/ollama-install.log)."; exit 1; }
   fi
 
   step "Model $MODEL"
@@ -129,5 +123,5 @@ step "Database"
 bin/rails db:prepare
 
 echo
-echo "All set. Start the app with: ./run.sh"
+echo "All set. Start the app (and Ollama) with: ./run.sh"
 echo "(Open a new terminal first if Ruby or Homebrew was just installed.)"
