@@ -10,7 +10,23 @@
 <pre class="submission-json"><%= JSON.pretty_generate(@submission.submission_json) %></pre>
 
 <div class="actions-row">
-  <% ["Email PDF to carrier", "Carrier portal (bot)", "Carrier API"].each do |channel| %>
-    <button type="button" class="button" disabled><%= channel %> <span class="coming-next">coming next</span></button>
+  <% { "api" => "Get quote via Acme API", "portal" => "Get quote via Beacon portal", "email" => "Email submission to Northwind" }.each do |channel, label| %>
+    <%= button_to label, submission_quote_requests_path(@submission), params: { channel: channel },
+          class: "button primary", form_class: "inline-form", data: { turbo_submits_with: "Working…" } %>
   <% end %>
 </div>
+
+<section class="section quote-requests">
+  <div class="section-head"><h2>Quote requests</h2></div>
+  <table>
+    <thead>
+      <tr><th>Carrier</th><th>Channel</th><th>Status</th><th>Premium</th><th>Reference</th><th>Message</th><th>Time</th></tr>
+    </thead>
+    <tbody id="quote_requests">
+      <% if @submission.quote_requests.empty? %>
+        <tr id="quote_requests_empty"><td colspan="7" class="empty-section">No quote requests yet.</td></tr>
+      <% end %>
+      <%= render partial: "quote_requests/quote_request", collection: @submission.quote_requests, as: :quote_request %>
+    </tbody>
+  </table>
+</section>

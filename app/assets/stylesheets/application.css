@@ -174,3 +174,13 @@ textarea { min-height: 360px; font-family: ui-monospace, Menlo, monospace; font-
   font-size: 0.85rem;
 }
 .coming-next { font-size: 0.75rem; color: var(--muted); margin-left: 4px; }
+
+/* Quote requests */
+.quote-requests { margin-top: 24px; overflow-x: auto; }
+.quote-requests table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.quote-requests th, .quote-requests td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.quote-requests th { color: var(--muted); font-weight: 600; }
+.badge.status-quoted { background: var(--green-bg); color: var(--green); }
+.badge.status-sent { background: var(--blue-bg); color: var(--blue); }
+.badge.status-declined, .badge.status-failed { background: #ffebe9; color: var(--red); }
+.badge.status-referred { background: var(--amber-bg); color: var(--amber); }

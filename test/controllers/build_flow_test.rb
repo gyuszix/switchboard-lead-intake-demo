@@ -51,8 +51,7 @@ class BuildFlowTest < ActionDispatch::IntegrationTest
 
     follow_redirect!
     assert_select "pre", /"fein": "82-6150347"/
-    assert_select "button[disabled]", 3
-    assert_select "button", /Carrier API\s*coming next/
+    assert_select "#quote_requests_empty"
 
     get submission_path(@s)
     assert_select "#review_status a[href=?]", ready_submission_path(@s)

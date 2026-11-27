@@ -1,0 +1,10 @@
+<%# locals: (quote_request:) %>
+<tr id="<%= dom_id(quote_request) %>">
+  <td><%= quote_request.carrier %></td>
+  <td><%= QuoteRequest::CHANNEL_LABELS[quote_request.channel] %></td>
+  <td><span class="badge status-<%= quote_request.status %>"><%= quote_request.status.humanize %></span></td>
+  <td><%= number_to_currency(quote_request.premium, precision: 0) if quote_request.premium %></td>
+  <td><%= quote_request.reference %></td>
+  <td><%= quote_request.message %></td>
+  <td class="counter"><%= quote_request.created_at&.strftime("%H:%M:%S") %></td>
+</tr>
