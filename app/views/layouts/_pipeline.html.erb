@@ -1,6 +1,12 @@
 <%# locals: (pipeline:) %>
 <nav id="pipeline" class="pipeline" aria-label="Submission pipeline" data-controller="pipeline"
      data-action="turbo:submit-start@document->pipeline#start turbo:submit-end@document->pipeline#stop">
+  <ul class="pipeline-legend" aria-label="Legend">
+    <% PipelineHelper::LEGEND.each do |actor, label| %>
+      <li><span class="legend-swatch actor-<%= actor %>"><%= pipeline_icon(actor) %></span><%= label %></li>
+    <% end %>
+    <li><span class="legend-swatch legend-gate"><%= pipeline_icon(:shield) %></span>Gate</li>
+  </ul>
   <ol class="pipeline-steps">
     <% pipeline.steps.each do |step| %>
       <li><%= pipeline_step_tag(step, pipeline) %></li>

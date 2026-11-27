@@ -19,6 +19,8 @@ class PipelineBarTest < ActionDispatch::IntegrationTest
       assert_select ".pipeline-step.gate", 3
       assert_select ".pipeline-step.gate .pipeline-gate-icon", 3
       assert_select ".pipeline-step:not(.gate) .pipeline-gate-icon", 0
+      assert_select ".pipeline-step.gate .gate-tag", text: "GATE", count: 3
+      assert_select ".pipeline-step:not(.gate) .gate-tag", 0
       assert_select ".pipeline-step.gate[data-pipeline-key=transcript_check][title=?]",
                     "Quote exists in transcript, value appears in quote, format rules, no conflicting mentions. Advisory: sorts fields into Verified / Needs approval"
       assert_select ".pipeline-step.gate[data-pipeline-key=review][title=?]",
@@ -29,6 +31,45 @@ class PipelineBarTest < ActionDispatch::IntegrationTest
       assert_select "[aria-current=step]", 1
       assert_select ".pipeline-step.state-active[data-pipeline-key=transcript][aria-current=step]"
     end
+  end
+
+  test "each step renders with its actor class" do
+    get root_path
+    actors = css_select("#pipeline .pipeline-step").to_h { [_1["data-pipeline-key"], _1["class"].split.grep(/\Aactor-/)] }
+    assert_equal({ "transcript" => ["actor-input"], "extract" => ["actor-ai"], "transcript_check" => ["actor-code"],
+                   "review" => ["actor-human"], "build" => ["actor-code"], "schema" => ["actor-code"],
+                   "channel" => ["actor-human"], "channel_api" => ["actor-code"], "channel_portal" => ["actor-code"],
+                   "channel_email" => ["actor-code"] }, actors)
+  end
+
+  test "state classes sit alongside actor classes, never replace them" do
+    s = create_sample_submission
+    s.confirm_all_verified!
+    s.approve!(:employee_count)
+    s.approve!(:years_in_business)
+    s.mark_not_provided!(:annual_revenue)
+    post build_submission_path(s)
+    assert_select ".pipeline-step.actor-input.state-done[data-pipeline-key=transcript]"
+    assert_select ".pipeline-step.actor-ai.state-done[data-pipeline-key=extract] .pipeline-label svg", 1
+    assert_select ".pipeline-step.actor-human.state-active[data-pipeline-key=review]"
+    assert_select ".pipeline-step.actor-code.state-failed[data-pipeline-key=schema]"
+    assert_select ".pipeline-step.actor-human.state-pending[data-pipeline-key=channel]"
+    css_select("#pipeline .pipeline-step").each do |step|
+      classes = step["class"].split
+      assert_equal 1, classes.grep(/\Aactor-/).size, step["data-pipeline-key"]
+      assert_equal 1, classes.grep(/\Astate-/).size, step["data-pipeline-key"]
+    end
+  end
+
+  test "the bar starts with a legend of actors and the gate marker" do
+    get root_path
+    assert_select "#pipeline > .pipeline-legend:first-child li", 4
+    assert_select "#pipeline .pipeline-legend li", text: "AI"
+    assert_select "#pipeline .pipeline-legend li", text: "Code"
+    assert_select "#pipeline .pipeline-legend li", text: "Human"
+    assert_select "#pipeline .pipeline-legend li", text: "Gate"
+    %w[ai code human].each { assert_select "#pipeline .pipeline-legend .legend-swatch.actor-#{_1} svg" }
+    assert_select "#pipeline .pipeline-legend .legend-swatch.legend-gate svg"
   end
 
   test "review page: broker review is the active step" do
@@ -54,11 +95,13 @@ class PipelineBarTest < ActionDispatch::IntegrationTest
     get ready_submission_path(s)
     assert_select ".pipeline-step.state-done", 6
     assert_select ".pipeline-step.state-active[data-pipeline-key=channel][aria-current=step]"
-    assert_select ".pipeline-step.state-quoted[data-pipeline-key=channel_api]", /Quoted/
+    assert_select ".pipeline-step.actor-code.state-quoted[data-pipeline-key=channel_api]", /Quoted/
+    assert_select "[data-pipeline-key=channel_api] .status-dot.status-quoted"
+    assert_select "[data-pipeline-key=channel_email] .status-dot", 0
     assert_select ".pipeline-step.state-pending[data-pipeline-key=channel_email]"
 
     post submission_quote_requests_path(s), params: { channel: "email" }, headers: { "Accept" => "text/vnd.turbo-stream.html" }
-    assert_select "turbo-stream[action=replace][target=pipeline] .pipeline-step.state-sent[data-pipeline-key=channel_email]"
+    assert_select "turbo-stream[action=replace][target=pipeline] .pipeline-step.actor-code.state-sent[data-pipeline-key=channel_email] .status-dot.status-sent"
   end
 
   test "the extract, build and channel forms name their pipeline step" do
