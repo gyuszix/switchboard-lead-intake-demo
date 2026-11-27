@@ -5,43 +5,45 @@ An AI extracts a commercial insurance intake form from a sales call transcript, 
 ## Pipeline
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Helvetica, Arial, sans-serif", "lineColor": "#64748b", "fontSize": "14px"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Helvetica, Arial, sans-serif", "lineColor": "#64748b", "fontSize": "14px", "edgeLabelBackground": "#ffffff", "textColor": "#334155"}}}%%
 flowchart LR
-    T([⛁ Call transcript])
-    E[✦ AI · Extract fields<br/>Granite via Ollama]
-    TC{{⚙ CODE · Transcript check<br/>◆ CHECK}}
-    R{{◉ HUMAN · Broker review<br/>◆ APPROVAL}}
-    B[⚙ CODE · Build JSON]
-    SC{{⚙ CODE · Schema check<br/>◆ VALIDATION}}
-    CH[◉ HUMAN · Choose channel]
-    API[⚙ CODE · Acme API client]
-    BOT[⚙ CODE · Beacon portal bot]
-    EM[⚙ CODE · Email + PDF]
-    ACME[(Acme Insurance)]
-    BEACON[(Beacon Mutual)]
-    NW[(Northwind Specialty)]
+    subgraph CANVAS[" "]
+        T([⛁ Call transcript])
+        E[✦ AI · Extract fields<br/>Granite via Ollama]
+        TC{{⚙ CODE · Transcript check<br/>◆ CHECK}}
+        R{{◉ HUMAN · Broker review<br/>◆ APPROVAL}}
+        B[⚙ CODE · Build JSON]
+        SC{{⚙ CODE · Schema check<br/>◆ VALIDATION}}
+        CH[◉ HUMAN · Choose channel]
+        API[⚙ CODE · Acme API client]
+        BOT[⚙ CODE · Beacon portal bot]
+        EM[⚙ CODE · Email + PDF]
+        ACME[(Acme Insurance)]
+        BEACON[(Beacon Mutual)]
+        NW[(Northwind Specialty)]
 
-    T --> E
-    E --> TC
-    TC --> R
-    R --> B
-    B --> SC
-    SC --> CH
-    SC -. "fails" .-> R
-    CH -. "edit values" .-> R
-    CH --> API
-    API --> ACME
-    CH --> BOT
-    BOT --> BEACON
-    CH --> EM
-    EM --> NW
+        T --> E
+        E --> TC
+        TC --> R
+        R --> B
+        B --> SC
+        SC --> CH
+        SC -. "fails" .-> R
+        CH -. "edit values" .-> R
+        CH --> API
+        API --> ACME
+        CH --> BOT
+        BOT --> BEACON
+        CH --> EM
+        EM --> NW
 
-    subgraph LEGEND[" "]
-        direction LR
-        L1[✦ AI]
-        L2[⚙ Code]
-        L3[◉ Human]
-        L4{{◆ Checkpoint}}
+        subgraph LEGEND[" "]
+            direction LR
+            L1[✦ AI]
+            L2[⚙ Code]
+            L3[◉ Human]
+            L4{{◆ Checkpoint}}
+        end
     end
 
     classDef input fill:#f1f5f9,stroke:#94a3b8,color:#334155
@@ -64,6 +66,7 @@ flowchart LR
 
     linkStyle 6 stroke:#dc2626,stroke-width:2px,stroke-dasharray:5 5
     linkStyle 7 stroke:#d97706,stroke-width:2px,stroke-dasharray:5 5
+    style CANVAS fill:#ffffff,stroke:#ffffff
     style LEGEND fill:#ffffff,stroke:#e2e8f0
 ```
 
