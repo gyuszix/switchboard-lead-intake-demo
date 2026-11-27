@@ -18,11 +18,11 @@ The raw JSON is the model's claim. The submission JSON is the broker-approved re
 
 Requirements: Ruby 4.0, Rails 8, and [Ollama](https://ollama.com) with `granite4.2:8b` pulled.
 
-On a new Mac, `./install.sh` sets all of that up: Ruby 4.0, Ollama running in the background, the Granite model, the gems and the database. It skips anything already installed. Homebrew is optional: if it's installed, Ruby and Ollama come from it (and it's added to `~/.zprofile`); if not, the script offers to install it. Without Homebrew, Ruby is installed with mise or rbenv if you have one (otherwise the script says what to install), and Ollama comes from [ollama.com/download](https://ollama.com/download). Ollama itself is optional too: without it the samples use built-in fixtures.
+On a new Mac, `./install.sh` sets all of that up: Ruby 4.0, Ollama, the Granite model, the gems and the database. It doesn't leave Ollama running; `./run.sh` does that. It skips anything already installed. Homebrew is optional: if it's installed, Ruby and Ollama come from it (and it's added to `~/.zprofile`); if not, the script offers to install it. Without Homebrew, Ruby is installed with mise or rbenv if you have one (otherwise the script says what to install), and Ollama comes from [ollama.com/download](https://ollama.com/download). Ollama itself is optional too: without it the samples use built-in fixtures.
 
 ```sh
 ./install.sh            # one-time setup on a new Mac
-./run.sh                # installs gems, prepares the database, starts http://localhost:3000
+./run.sh                # installs gems, prepares the database, starts Ollama and http://localhost:3000
 bin/rails test          # fast and offline; never calls Ollama
 ```
 
@@ -33,7 +33,7 @@ Configuration (optional):
 | `OLLAMA_URL`   | `http://localhost:11434` |
 | `OLLAMA_MODEL` | `granite4.2:8b`          |
 
-If Ollama is unreachable, the three sample transcripts fall back to hardcoded fixture extractions (`config/samples/*.json`) and the review page says so. Any other transcript comes back with every field empty, needing approval.
+`./run.sh` starts Ollama if it isn't running: the Ollama app if you have it, otherwise `ollama serve`, which it stops again when you press Ctrl+C. It also warns if the model hasn't been pulled. If Ollama is unreachable, the three sample transcripts fall back to hardcoded fixture extractions (`config/samples/*.json`) and the review page says so. Any other transcript comes back with every field empty, needing approval.
 
 Extraction runs synchronously and can take up to a minute on a laptop.
 
