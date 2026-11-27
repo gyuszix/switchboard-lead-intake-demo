@@ -6,12 +6,18 @@ module Channels
 
     private
 
-    # Renders the PDF once: the same bytes are attached and kept on the
-    # QuoteRequest, so the broker can see exactly what was sent.
+    # Records the email exactly as delivered: its headers, plain-text body and
+    # attachment name as JSON (in the column the API channel uses for what it
+    # sent), and the attached PDF's bytes as the document.
     def deliver(_json)
       pdf = SubmissionPdf.new(@submission).render
-      CarrierSubmissionMailer.with(submission: @submission, pdf: pdf).submission.deliver_now
-      { status: "sent", message: "Awaiting carrier reply", document: pdf }
+      mail = CarrierSubmissionMailer.with(submission: @submission, pdf: pdf).submission.deliver_now
+      attachment = mail.attachments.first
+      sent = {
+        from: mail[:from].to_s, to: mail[:to].to_s, subject: mail.subject, date: mail[:date].to_s,
+        body: mail.text_part.body.decoded, attachment: attachment.filename
+      }
+      { status: "sent", message: "Awaiting carrier reply", document: attachment.body.decoded, request_body: sent.to_json }
     end
   end
 end

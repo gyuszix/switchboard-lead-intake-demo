@@ -27,6 +27,21 @@ class EmailChannelTest < ActiveSupport::TestCase
                  [qr.status, qr.message, qr.carrier, qr.channel]
   end
 
+  test "channel records the email as it was sent" do
+    qr = Channels::Email.new.call(@s)
+    mail = ActionMailer::Base.deliveries.last
+    sent = qr.reload.request_data
+    assert_equal "broker@lead-intake.test", sent["from"]
+    assert_equal "submissions@northwind.test", sent["to"]
+    assert_equal "New submission ##{@s.id}: Brightpath IT Solutions Inc", sent["subject"]
+    assert_equal mail[:date].to_s, sent["date"]
+    assert sent["date"].present?
+    assert_equal mail.text_part.body.decoded, sent["body"]
+    assert_includes sent["body"], "Please find attached a commercial insurance application"
+    assert_equal "commercial-insurance-application-#{@s.id}.pdf", sent["attachment"]
+    assert_nil qr.response_body
+  end
+
   test "the attached PDF is the one kept on the QuoteRequest" do
     qr = Channels::Email.new.call(@s)
     attached = ActionMailer::Base.deliveries.last.attachments.first.body.decoded
