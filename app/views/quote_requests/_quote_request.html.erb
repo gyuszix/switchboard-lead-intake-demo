@@ -17,10 +17,8 @@
       </details>
     <% elsif quote_request.channel == "portal" && (sent = quote_request.request_data) %>
       <%= render "quote_requests/portal_record", sent: sent, received: quote_request.response_data %>
-    <% end %>
-    <% if quote_request.document.present? %>
-      <div><%= link_to "View sent PDF", document_submission_quote_request_path(quote_request.submission, quote_request),
-                 target: "_blank", rel: "noopener", data: { turbo: false } %></div>
+    <% elsif quote_request.channel == "email" && (sent = quote_request.request_data) %>
+      <%= render "quote_requests/email_record", quote_request: quote_request, sent: sent %>
     <% end %>
   </td>
   <td class="counter"><%= quote_request.created_at&.strftime("%H:%M:%S") %></td>

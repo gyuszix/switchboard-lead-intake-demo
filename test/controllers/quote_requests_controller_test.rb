@@ -38,19 +38,31 @@ class QuoteRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "failed", @s.quote_requests.first.status
   end
 
-  test "email rows link to the sent PDF, served inline" do
+  test "email rows show the sent email, with the attachment linking to the stored PDF" do
     make_ready
     post submission_quote_requests_path(@s), params: { channel: "email" },
       headers: { "Accept" => "text/vnd.turbo-stream.html" }
     qr = @s.quote_requests.first
+    sent = qr.request_data
     path = document_submission_quote_request_path(@s, qr)
-    assert_select "turbo-stream[target=quote_requests] a[href=?]", path, "View sent PDF"
+    assert_select "turbo-stream[target=quote_requests] details.exchange" do
+      assert_select "summary", "Sent"
+      assert_select "dt", %w[From To Subject Date].size
+      assert_select "dt + dd", sent["from"]
+      assert_select "dd", "submissions@northwind.test"
+      assert_select "dd", sent["subject"]
+      assert_select "dd", sent["date"]
+      assert_select "a[href=?]", path, sent["attachment"]
+      assert_select "pre", /Please find attached a commercial insurance application/
+    end
+    assert_select "a", text: "View sent PDF", count: 0
+    assert_select "details.exchange .exchange-label", text: "Received", count: 0
 
     get path
     assert_response :success
     assert_equal "application/pdf", response.media_type
     assert_match(/\Ainline/, response.headers["Content-Disposition"])
-    assert_equal qr.document.b, response.body.b
+    assert_equal ActionMailer::Base.deliveries.last.attachments.first.body.decoded.b, response.body.b
   end
 
   test "API rows show what was sent and received" do
@@ -97,7 +109,7 @@ class QuoteRequestsControllerTest < ActionDispatch::IntegrationTest
     make_ready
     qr = @s.quote_requests.create!(channel: "api", carrier: "Acme Insurance", status: "quoted")
     get ready_submission_path(@s)
-    assert_select "a", text: "View sent PDF", count: 0
+    assert_select "details.exchange a", count: 0
     get document_submission_quote_request_path(@s, qr)
     assert_response :not_found
   end
