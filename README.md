@@ -10,7 +10,7 @@ Every field is either **proven correct by deterministic code against the transcr
 2. **Broker review:** one click confirms all verified fields; each needs-approval field is approved as-is, edited, or marked not provided. Any field can be edited.
 3. **Build:** once all 13 fields are resolved, **Approve and build submission** turns the broker-approved values into the submission JSON (`SubmissionBuilder`): integers for numbers, an array for coverage types, `YYYY-MM-DD` for the date, `null` for "Not provided". A value that can't be converted is kept raw, never guessed or fixed.
 4. **Deterministic check:** `SubmissionValidator` validates the submission JSON against `config/schemas/submission_v1.json`. If it fails, nothing is saved: the review page lists each failing field in plain English and highlights its row. If it passes, the submission is saved and shown on the **Ready to send** page.
-5. **Channel choice:** email PDF / carrier portal bot / carrier API. Placeholders only, not built yet.
+5. **Channel choice:** on the Ready to send page, send the submission to a carrier by API, portal bot or email (see [Channels](#channels)).
 
 The raw JSON is the model's claim. The submission JSON is the broker-approved record, and is the only thing that will ever leave the app.
 
@@ -71,6 +71,22 @@ Review rules:
 
 The schema checks format only. Value checks like "date not in the past" stay in the review stage.
 
+## Channels
+
+Three mock carriers live inside this app (`app/controllers/mock_carriers/`, under `/mock_carriers`). They stand in for real carrier systems and share nothing with the channel code except a small deterministic pricing module (`MockCarriers::Pricing`). The channels call them over real HTTP at `MOCK_CARRIER_BASE_URL` (default `http://localhost:3000`). The dev server runs 3 Puma threads, so the app can call itself.
+
+Before any channel runs, the stored submission JSON is re-validated against the schema, and the channel refuses (422) if it fails or the submission is no longer ready. Each attempt is saved as a `QuoteRequest` (quoted / declined / referred / sent / failed) and added to the Quote requests list. Channels never raise to the UI: timeouts, bad responses and unexpected pages become `failed` with a clear message.
+
+| Channel | Mock carrier | How it works |
+| --- | --- | --- |
+| `Channels::Api` | **Acme Insurance**: JSON API at `POST /mock_carriers/acme/api/v1/quotes`, bearer token (`ACME_API_TOKEN`, default `acme-demo-token`) | Maps the submission JSON to Acme's field names, POSTs it, and interprets 201 quoted / 200 declined or referred / 401 / 422 / 503. A business named "Acme Test Outage" triggers the 503. |
+| `Channels::Portal` | **Beacon Mutual**: HTML broker portal with session login (`BEACON_USERNAME` / `BEACON_PASSWORD`, default `broker` / `beacon-demo`) | A Mechanize bot logs in, fills the application form by field name (`950,000` sales, `MM/DD/YYYY` date), ticks coverage checkboxes by label text, submits, and parses the result page. A coverage with no checkbox (e.g. commercial auto, cyber) stops it before submitting. |
+| `Channels::Email` | **Northwind Specialty**: `submissions@northwind.test` | Emails a plain-text summary with the application PDF attached. In development letter_opener shows the email in the browser. Status is `sent`, "Awaiting carrier reply"; no reply is simulated. |
+
+Both quoting carriers use the same rules: decline any coverage they don't offer, refer annual revenue over $5,000,000, otherwise quote. Each channel translates our coverage names (e.g. "workers compensation") into its carrier's vocabulary ("workers comp", "Workers Comp").
+
+**Trade-offs.** The API is fast and structured: typed fields, explicit status codes, and an unambiguous result. The portal bot works where a carrier has no API, but it depends on page layout: a renamed field, label or result table breaks it, which is why it checks every step and fails loudly. Email works with any carrier, but nothing comes back automatically: the outcome depends on a human replying.
+
 ## Why
 
 **The model's output is treated as a claim to be proven, not an answer.** A field is never trusted because the model said so, only because code proved it against the transcript or a human approved it.
@@ -100,7 +116,9 @@ Fields that require interpretation (like durations relative to the call date) ar
 - `app/models/submission.rb`: the field structure and review rules
 - `app/models/submission_builder.rb`: approved values → typed submission JSON
 - `app/models/submission_validator.rb` and `config/schemas/submission_v1.json`: the schema check and its plain-English errors
-- `app/models/submission_pdf.rb`: the Prawn PDF, kept for the future email channel
+- `app/models/submission_pdf.rb`: the Prawn PDF, built from the submission JSON for the email channel
+- `app/models/channels/`: the API, portal bot and email channels; `app/models/quote_request.rb` records each attempt
+- `app/controllers/mock_carriers/`: the fake Acme API, Beacon portal and shared pricing
 - `config/samples/`: sample transcripts and fixture extractions
 
 ## Next steps (not built)
