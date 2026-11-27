@@ -3,12 +3,7 @@ require "test_helper"
 class BuildFlowTest < ActionDispatch::IntegrationTest
   setup { @s = create_sample_submission }
 
-  def resolve_all(revenue: "4200000")
-    @s.confirm_all_verified!
-    @s.approve!(:employee_count)
-    @s.approve!(:years_in_business)
-    @s.edit!(:annual_revenue, revenue)
-  end
+  def resolve_all = resolve_sample(@s)
 
   test "build is refused with 422 while any field is unresolved" do
     @s.confirm_all_verified!
@@ -26,10 +21,7 @@ class BuildFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "invalid submission is not saved and errors are shown on the review page" do
-    @s.confirm_all_verified!
-    @s.approve!(:employee_count)
-    @s.approve!(:years_in_business)
-    @s.mark_not_provided!(:annual_revenue)
+    resolve_sample(@s, revenue: nil)
 
     post build_submission_path(@s)
     assert_response :unprocessable_entity
@@ -47,10 +39,10 @@ class BuildFlowTest < ActionDispatch::IntegrationTest
     assert_redirected_to ready_submission_path(@s)
     @s.reload
     assert @s.ready_at.present?
-    assert_equal 4_200_000, @s.submission_json.dig("operations", "annual_revenue")
+    assert_equal 5_400_000, @s.submission_json.dig("operations", "annual_revenue")
 
     follow_redirect!
-    assert_select "pre", /"fein": "82-6150347"/
+    assert_select "pre", /"fein": "81-4420976"/
     assert_select "#quote_requests_empty"
 
     get submission_path(@s)
@@ -62,7 +54,7 @@ class BuildFlowTest < ActionDispatch::IntegrationTest
     post build_submission_path(@s)
     assert @s.reload.ready?
 
-    patch submission_field_path(@s, "zip"), params: { value: "60174" },
+    patch submission_field_path(@s, "zip"), params: { value: "07073" },
       headers: { "Accept" => "text/vnd.turbo-stream.html" }
     assert_response :success
     @s.reload

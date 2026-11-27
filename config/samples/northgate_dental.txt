@@ -1,0 +1,23 @@
+Broker: Hi Ana, thanks for making time. What's the legal name of the practice?
+Client: Northgate Dental Studio PC.
+Broker: And your FEIN?
+Client: 52-3318406.
+Broker: Business address?
+Client: 410 Bloomfield Street, Hoboken, New Jersey, 07030.
+Broker: How long have you been open?
+Client: We've been open 9 years.
+Broker: What does the practice do?
+Client: General and cosmetic dentistry, plus hygiene and whitening.
+Broker: Do you know your NAICS code?
+Client: Yes, it's 621210.
+Broker: Annual revenue?
+Client: $2,000,000 last year.
+Broker: How many employees?
+Client: 12 employees.
+Broker: What coverage do you need?
+Client: General liability, professional liability, property and workers comp.
+Broker: When should it start?
+Client: March 1, 2027.
+Broker: And you're the main contact?
+Client: Yes, Dr. Ana Kowalski. Email is ana@northgatedental.com.
+Broker: Perfect, I'll get quotes out today.

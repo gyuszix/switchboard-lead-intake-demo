@@ -1,0 +1,25 @@
+Broker: Hi, is this Marco Bellini?
+Client: Speaking. Sorry, it's loud, the saws are running.
+Broker: No problem. What's the business called?
+Client: Hudson Millwork LLC.
+Broker: And your FEIN?
+Client: Eight one, four four two, oh nine seven six.
+Broker: Got it. Address?
+Client: The shop is 77 Paterson Plank Road, Carlstadt, New Jersey, 07072. We've also got a showroom in Montclair, zip 07042, but quote the shop.
+Broker: How long have you been running?
+Client: Since 2011.
+Broker: What do you make?
+Client: Custom kitchen cabinets and built-in joinery, mostly for contractors.
+Broker: Do you know your NAICS code?
+Client: My accountant has it, I don't.
+Broker: I'll look it up. Revenue last year?
+Client: Five point four million. My brother runs Hudson Installs, they do the fitting, but they're separate. They did about 1.2 million with 10 guys.
+Broker: Just yours for now. Employees?
+Client: We're 38. Sorry, 41, we hired three finishers last month.
+Broker: What coverage do you need?
+Client: General liability, property and workers comp.
+Broker: When should it start?
+Client: The first of April next year.
+Broker: And best email?
+Client: marco at hudson millwork dot com, all one word.
+Broker: Thanks Marco, I'll be in touch.

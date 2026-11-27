@@ -1,0 +1,94 @@
+{
+  "business_name": {
+    "value": "Northgate Dental Studio PC",
+    "source_quote": "Northgate Dental Studio PC.",
+    "all_mentions": [
+      "Northgate Dental Studio PC."
+    ]
+  },
+  "fein": {
+    "value": "52-3318406",
+    "source_quote": "52-3318406.",
+    "all_mentions": [
+      "52-3318406."
+    ]
+  },
+  "address": {
+    "value": "410 Bloomfield Street, Hoboken, New Jersey",
+    "source_quote": "410 Bloomfield Street, Hoboken, New Jersey, 07030.",
+    "all_mentions": [
+      "410 Bloomfield Street, Hoboken, New Jersey, 07030."
+    ]
+  },
+  "zip": {
+    "value": "07030",
+    "source_quote": "Hoboken, New Jersey, 07030.",
+    "all_mentions": [
+      "Hoboken, New Jersey, 07030."
+    ]
+  },
+  "industry_description": {
+    "value": "General and cosmetic dentistry, plus hygiene and whitening",
+    "source_quote": "General and cosmetic dentistry, plus hygiene and whitening.",
+    "all_mentions": [
+      "General and cosmetic dentistry, plus hygiene and whitening."
+    ]
+  },
+  "naics_code": {
+    "value": "621210",
+    "source_quote": "Yes, it's 621210.",
+    "all_mentions": [
+      "Yes, it's 621210."
+    ]
+  },
+  "years_in_business": {
+    "value": "9",
+    "source_quote": "We've been open 9 years.",
+    "all_mentions": [
+      "We've been open 9 years."
+    ]
+  },
+  "annual_revenue": {
+    "value": "2000000",
+    "source_quote": "$2,000,000 last year.",
+    "all_mentions": [
+      "$2,000,000 last year."
+    ]
+  },
+  "employee_count": {
+    "value": "12",
+    "source_quote": "12 employees.",
+    "all_mentions": [
+      "12 employees."
+    ]
+  },
+  "coverage_types": {
+    "value": "general liability, professional liability, property, workers comp",
+    "source_quote": "General liability, professional liability, property and workers comp.",
+    "all_mentions": [
+      "General liability, professional liability, property and workers comp."
+    ]
+  },
+  "effective_date": {
+    "value": "2027-03-01",
+    "source_quote": "March 1, 2027.",
+    "all_mentions": [
+      "March 1, 2027."
+    ]
+  },
+  "contact_name": {
+    "value": "Ana Kowalski",
+    "source_quote": "Yes, Dr. Ana Kowalski.",
+    "all_mentions": [
+      "Hi Ana, thanks for making time.",
+      "Yes, Dr. Ana Kowalski."
+    ]
+  },
+  "contact_email": {
+    "value": "ana@northgatedental.com",
+    "source_quote": "Email is ana@northgatedental.com.",
+    "all_mentions": [
+      "Email is ana@northgatedental.com."
+    ]
+  }
+}

@@ -19,10 +19,10 @@ class ApiChannelTest < ActiveSupport::TestCase
     assert_equal "http://carrier.test/mock_carriers/acme/api/v1/quotes", @sent[:url]
     assert_equal "Bearer t0k", @sent[:headers]["Authorization"]
     assert_equal({
-      "insured_name" => "Brightpath IT Solutions Inc", "tax_id" => "82-6150347",
-      "street_address" => "400 Commerce Drive, Suite 210, Schaumburg, Illinois", "postal_code" => "60173",
-      "naics" => "541512", "annual_revenue" => 4_200_000, "employees" => 45,
-      "coverages" => ["cyber", "professional liability", "general liability"], "effective_date" => "2027-02-15"
+      "insured_name" => "Hudson Millwork LLC", "tax_id" => "81-4420976",
+      "street_address" => "77 Paterson Plank Road, Carlstadt, New Jersey", "postal_code" => "07072",
+      "naics" => "337110", "annual_revenue" => 5_400_000, "employees" => 41,
+      "coverages" => ["general liability", "property", "workers comp"], "effective_date" => "2027-04-01"
     }, @sent[:json])
   end
 
@@ -57,7 +57,7 @@ class ApiChannelTest < ActiveSupport::TestCase
     assert qr.request_body.start_with?("POST http://carrier.test/mock_carriers/acme/api/v1/quotes\n")
     assert_includes qr.request_body, "Authorization: Bearer [hidden]"
     assert_not_includes qr.request_body, "t0k"
-    assert_includes qr.request_body, %("insured_name": "Brightpath IT Solutions Inc")
+    assert_includes qr.request_body, %("insured_name": "Hudson Millwork LLC")
     assert qr.response_body.start_with?("HTTP 201\n\n")
     assert_includes qr.response_body, %("quote_id": "ACM-42")
 

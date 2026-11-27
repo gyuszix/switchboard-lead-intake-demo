@@ -4,9 +4,9 @@ module Sample
   DIR = Rails.root.join("config/samples")
 
   ALL = [
-    { key: "bakery", title: "Clean: bakery" },
-    { key: "landscaping", title: "Misheard FEIN: landscaping" },
-    { key: "it_services", title: "Messy: IT services" }
+    { key: "northgate_dental", title: "Northgate Dental (happy path)" },
+    { key: "hudson_millwork", title: "Hudson Millwork (AI caught)" },
+    { key: "lumen_analytics", title: "Lumen Analytics (channels differ)" }
   ].freeze
 
   def self.all

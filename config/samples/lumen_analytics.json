@@ -1,0 +1,94 @@
+{
+  "business_name": {
+    "value": "Lumen Analytics LLC",
+    "source_quote": "Lumen Analytics LLC.",
+    "all_mentions": [
+      "Lumen Analytics LLC."
+    ]
+  },
+  "fein": {
+    "value": "30-7719245",
+    "source_quote": "30-7719245.",
+    "all_mentions": [
+      "30-7719245."
+    ]
+  },
+  "address": {
+    "value": "95 Christopher Columbus Drive, Jersey City, New Jersey",
+    "source_quote": "95 Christopher Columbus Drive, Jersey City, New Jersey, 07302-3911.",
+    "all_mentions": [
+      "95 Christopher Columbus Drive, Jersey City, New Jersey, 07302-3911."
+    ]
+  },
+  "zip": {
+    "value": "07302-3911",
+    "source_quote": "Jersey City, New Jersey, 07302-3911.",
+    "all_mentions": [
+      "Jersey City, New Jersey, 07302-3911."
+    ]
+  },
+  "industry_description": {
+    "value": "Data analytics consulting",
+    "source_quote": "Data analytics consulting. We build dashboards and reporting for mid-size retailers.",
+    "all_mentions": [
+      "Data analytics consulting. We build dashboards and reporting for mid-size retailers."
+    ]
+  },
+  "naics_code": {
+    "value": "541512",
+    "source_quote": "541512.",
+    "all_mentions": [
+      "541512."
+    ]
+  },
+  "years_in_business": {
+    "value": "4",
+    "source_quote": "4 years.",
+    "all_mentions": [
+      "4 years."
+    ]
+  },
+  "annual_revenue": {
+    "value": "1500000",
+    "source_quote": "$1,500,000.",
+    "all_mentions": [
+      "$1,500,000."
+    ]
+  },
+  "employee_count": {
+    "value": "8",
+    "source_quote": "8 employees.",
+    "all_mentions": [
+      "8 employees."
+    ]
+  },
+  "coverage_types": {
+    "value": "general liability, professional liability, cyber",
+    "source_quote": "General liability, professional liability, cyber.",
+    "all_mentions": [
+      "General liability, professional liability, cyber."
+    ]
+  },
+  "effective_date": {
+    "value": "2027-01-15",
+    "source_quote": "January 15, 2027.",
+    "all_mentions": [
+      "January 15, 2027."
+    ]
+  },
+  "contact_name": {
+    "value": "Owen Lee",
+    "source_quote": "Me, Owen Lee.",
+    "all_mentions": [
+      "Hi Owen, thanks for calling.",
+      "Me, Owen Lee."
+    ]
+  },
+  "contact_email": {
+    "value": "owen@lumenanalytics.io",
+    "source_quote": "Email is owen@lumenanalytics.io.",
+    "all_mentions": [
+      "Email is owen@lumenanalytics.io."
+    ]
+  }
+}

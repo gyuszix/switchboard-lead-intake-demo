@@ -22,9 +22,9 @@ class FieldsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".transcript-line", lines.size
     assert_select "#line-1 strong", "Broker:"
 
-    fein_line = "line-#{lines.index { _1.include?("82-6150347") } + 1}"
-    assert_select "#field_fein a.quote-link[href=?][data-transcript-line-param=?]", "##{fein_line}", fein_line
-    assert_select "##{fein_line}", /82-6150347/
+    name_line = "line-#{lines.index { _1.include?("Hudson Millwork LLC.") } + 1}"
+    assert_select "#field_business_name a.quote-link[href=?][data-transcript-line-param=?]", "##{name_line}", name_line
+    assert_select "##{name_line}", /Hudson Millwork LLC/
   end
 
   test "a quote with no matching line is not clickable" do
@@ -39,9 +39,9 @@ class FieldsControllerTest < ActionDispatch::IntegrationTest
     patch confirm_all_submission_path(@s), headers: stream_headers
     assert_response :success
     assert_equal "text/vnd.turbo-stream.html", response.media_type
-    assert_select "turbo-stream[action=replace][target=field_fein]"
+    assert_select "turbo-stream[action=replace][target=field_business_name]"
     assert_select "turbo-stream[target=field_employee_count]", 0
-    assert_select "turbo-stream[target=review_status]", /10 of 13/
+    assert_select "turbo-stream[target=review_status]", /5 of 13/
     assert_nil @s.reload.field(:employee_count)["resolution"]
   end
 
@@ -53,7 +53,7 @@ class FieldsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "edit with a valid value resolves the row" do
-    patch submission_field_path(@s, "annual_revenue"), params: { value: "4200000" }, headers: stream_headers
+    patch submission_field_path(@s, "annual_revenue"), params: { value: "5400000" }, headers: stream_headers
     assert_response :success
     assert_equal "edited", @s.reload.field(:annual_revenue)["resolution"]
   end
@@ -71,18 +71,18 @@ class FieldsControllerTest < ActionDispatch::IntegrationTest
 
   test "verified rows have an edit action and a verified badge" do
     get submission_path(@s)
-    assert_select "#field_fein .badge.green", "Verified"
-    assert_select "#field_fein button", "Edit"
-    assert_select "#field_fein form[action=?]", approve_submission_field_path(@s, "fein"), 0
+    assert_select "#field_business_name .badge.green", "Verified"
+    assert_select "#field_business_name button", "Edit"
+    assert_select "#field_business_name form[action=?]", approve_submission_field_path(@s, "business_name"), 0
   end
 
   test "editing a verified field swaps the badge and keeps the quote" do
-    patch submission_field_path(@s, "zip"), params: { value: "60174" }, headers: stream_headers
+    patch submission_field_path(@s, "business_name"), params: { value: "Hudson Millwork Inc" }, headers: stream_headers
     assert_response :success
-    assert_select "turbo-stream[target=field_zip]" do
+    assert_select "turbo-stream[target=field_business_name]" do
       assert_select ".badge.blue", "Edited by broker"
       assert_select ".badge.green", 0
-      assert_select ".quote", /60173/
+      assert_select ".quote", /Hudson Millwork LLC/
     end
   end
 

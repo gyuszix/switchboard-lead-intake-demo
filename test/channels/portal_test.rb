@@ -38,21 +38,20 @@ class PortalChannelTest < ActiveSupport::TestCase
     server&.stop(true)
   end
 
-  # The IT services sample asks for cyber, which Beacon doesn't offer; these
-  # coverages all have checkboxes.
-  def beacon_ready_submission
+  # The Hudson sample with cyber added, which Beacon doesn't offer.
+  def cyber_ready_submission
     s = create_ready_submission
-    s.update_columns(submission_json: s.submission_json.deep_merge("coverage" => { "coverage_types" => ["general liability", "professional liability"] }))
+    s.update_columns(submission_json: s.submission_json.deep_merge("coverage" => { "coverage_types" => ["general liability", "cyber liability"] }))
     s
   end
 
   test "maps the submission to Beacon field names and formats" do
     json = create_ready_submission.submission_json
     assert_equal({
-      "insured_legal_entity" => "Brightpath IT Solutions Inc", "tax_id_no" => "82-6150347",
-      "street_address" => "400 Commerce Drive, Suite 210, Schaumburg, Illinois", "zip_code" => "60173",
-      "naics" => "541512", "gross_annual_sales" => "4,200,000", "number_of_employees" => "45",
-      "effective_date" => "02/15/2027"
+      "insured_legal_entity" => "Hudson Millwork LLC", "tax_id_no" => "81-4420976",
+      "street_address" => "77 Paterson Plank Road, Carlstadt, New Jersey", "zip_code" => "07072",
+      "naics" => "337110", "gross_annual_sales" => "5,400,000", "number_of_employees" => "41",
+      "effective_date" => "04/01/2027"
     }, portal.form_values(json))
   end
 
@@ -89,23 +88,24 @@ class PortalChannelTest < ActiveSupport::TestCase
   end
 
   test "records each step, the filled fields and ticked coverages" do
-    qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(beacon_ready_submission) }
+    qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(create_ready_submission) }
     assert_equal "quoted", qr.status
     sent = qr.request_data
     assert_equal ["GET /mock_carriers/beacon/login → 200", "POST /mock_carriers/beacon/login → 302",
                   "GET /mock_carriers/beacon/applications/new → 200", "Logged in as broker",
-                  "Filled 8 fields", "Ticked 2 coverages", "POST /mock_carriers/beacon/applications → 200"], sent["steps"]
+                  "Filled 8 fields", "Ticked 3 coverages", "POST /mock_carriers/beacon/applications → 200"], sent["steps"]
     assert_equal 8, sent["filled"].size
-    assert_includes sent["filled"], { "label" => "Tax ID No.", "name" => "tax_id_no", "value" => "82-6150347", "source" => "applicant.fein" }
-    assert_includes sent["filled"], { "label" => "Gross Annual Sales", "name" => "gross_annual_sales", "value" => "4,200,000",
+    assert_includes sent["filled"], { "label" => "Tax ID No.", "name" => "tax_id_no", "value" => "81-4420976", "source" => "applicant.fein" }
+    assert_includes sent["filled"], { "label" => "Gross Annual Sales", "name" => "gross_annual_sales", "value" => "5,400,000",
                                       "source" => "operations.annual_revenue" }
     assert_equal [{ "name" => "general liability", "label" => "General Liability" },
-                  { "name" => "professional liability", "label" => "Professional Liability" }], sent["coverages"]["ticked"]
+                  { "name" => "property", "label" => "Property" },
+                  { "name" => "workers comp", "label" => "Workers Comp" }], sent["coverages"]["ticked"]
     assert_empty sent["coverages"]["unmatched"]
   end
 
   test "every scraped value comes with the HTML it was read from" do
-    qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(beacon_ready_submission) }
+    qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(create_ready_submission) }
     scraped = qr.response_data["scraped"]
     assert_equal [["Status", "quoted"], ["Reference", "BCN-722916"], ["Premium", 3825]], scraped.map { [_1["label"], _1["value"]] }
     assert_equal "<tr>\n<th>Premium</th>\n<td>$3,825.00</td>\n</tr>", scraped.last["html"]
@@ -123,14 +123,14 @@ class PortalChannelTest < ActiveSupport::TestCase
   end
 
   test "never records the password or the session cookie" do
-    qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(beacon_ready_submission) }
+    qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(create_ready_submission) }
     stored = qr.attributes.values.join(" ")
     refute_includes stored, "beacon-demo"
     refute_includes stored, "cookie-secret-123"
   end
 
   test "a run that stops early records steps up to the failure and nothing scraped" do
-    qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(create_ready_submission) }
+    qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(cyber_ready_submission) }
     assert_equal "failed", qr.status
     sent = qr.request_data
     assert_equal ["Logged in as broker", "Filled 8 fields", "Stopped: Coverage 'cyber liability' not available on Beacon portal"],

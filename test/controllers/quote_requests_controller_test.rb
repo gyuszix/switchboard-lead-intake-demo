@@ -4,10 +4,7 @@ class QuoteRequestsControllerTest < ActionDispatch::IntegrationTest
   setup { @s = create_sample_submission }
 
   def make_ready
-    @s.confirm_all_verified!
-    @s.approve!(:employee_count)
-    @s.approve!(:years_in_business)
-    @s.edit!(:annual_revenue, "4200000")
+    resolve_sample(@s)
     assert_empty @s.build_submission!
   end
 

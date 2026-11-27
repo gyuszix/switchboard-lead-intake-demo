@@ -1,0 +1,23 @@
+Broker: Hi Owen, thanks for calling. What's the business name?
+Client: Lumen Analytics LLC.
+Broker: FEIN?
+Client: 30-7719245.
+Broker: Address?
+Client: 95 Christopher Columbus Drive, Jersey City, New Jersey, 07302-3911.
+Broker: How long have you been operating?
+Client: 4 years.
+Broker: What do you do?
+Client: Data analytics consulting. We build dashboards and reporting for mid-size retailers.
+Broker: NAICS code?
+Client: 541512.
+Broker: Revenue last year?
+Client: $1,500,000.
+Broker: Employees?
+Client: 8 employees.
+Broker: What coverage are you after?
+Client: General liability, professional liability, cyber.
+Broker: When should it start?
+Client: January 15, 2027.
+Broker: Main contact?
+Client: Me, Owen Lee. Email is owen@lumenanalytics.io.
+Broker: Great, I'll send options shortly.

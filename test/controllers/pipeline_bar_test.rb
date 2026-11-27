@@ -1,12 +1,6 @@
 require "test_helper"
 
 class PipelineBarTest < ActionDispatch::IntegrationTest
-  def resolve_all(s)
-    s.confirm_all_verified!
-    s.approve!(:employee_count)
-    s.approve!(:years_in_business)
-  end
-
   test "every page renders the bar with actor labels and gate markers" do
     get root_path
     assert_select "nav#pipeline.pipeline[aria-label=?]", "Submission pipeline" do
@@ -44,10 +38,7 @@ class PipelineBarTest < ActionDispatch::IntegrationTest
 
   test "state classes sit alongside actor classes, never replace them" do
     s = create_sample_submission
-    s.confirm_all_verified!
-    s.approve!(:employee_count)
-    s.approve!(:years_in_business)
-    s.mark_not_provided!(:annual_revenue)
+    resolve_sample(s, revenue: nil)
     post build_submission_path(s)
     assert_select ".pipeline-step.actor-input.state-done[data-pipeline-key=transcript]"
     assert_select ".pipeline-step.actor-ai.state-done[data-pipeline-key=extract] .pipeline-label svg", 1
@@ -81,8 +72,7 @@ class PipelineBarTest < ActionDispatch::IntegrationTest
 
   test "a failed build shows the schema check failed" do
     s = create_sample_submission
-    resolve_all(s)
-    s.mark_not_provided!(:annual_revenue)
+    resolve_sample(s, revenue: nil)
     post build_submission_path(s)
     assert_response :unprocessable_entity
     assert_select ".pipeline-step.state-failed[data-pipeline-key=schema]"
@@ -109,8 +99,7 @@ class PipelineBarTest < ActionDispatch::IntegrationTest
     assert_select "form[data-pipeline-step=extract][action=?]", submissions_path
 
     s = create_sample_submission
-    resolve_all(s)
-    s.edit!(:annual_revenue, "4200000")
+    resolve_sample(s)
     get submission_path(s)
     assert_select "form[data-pipeline-step=?][action=?]", "build schema", build_submission_path(s)
 

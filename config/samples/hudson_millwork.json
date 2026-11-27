@@ -1,0 +1,97 @@
+{
+  "business_name": {
+    "value": "Hudson Millwork LLC",
+    "source_quote": "Hudson Millwork LLC.",
+    "all_mentions": [
+      "Hudson Millwork LLC."
+    ]
+  },
+  "fein": {
+    "value": "Eight one, four four two, oh nine seven six",
+    "source_quote": "Eight one, four four two, oh nine seven six.",
+    "all_mentions": [
+      "Eight one, four four two, oh nine seven six."
+    ]
+  },
+  "address": {
+    "value": "77 Paterson Plank Road, Carlstadt, New Jersey",
+    "source_quote": "The shop is 77 Paterson Plank Road, Carlstadt, New Jersey, 07072.",
+    "all_mentions": [
+      "The shop is 77 Paterson Plank Road, Carlstadt, New Jersey, 07072.",
+      "We've also got a showroom in Montclair, zip 07042, but quote the shop."
+    ]
+  },
+  "zip": {
+    "value": "07072",
+    "source_quote": "Carlstadt, New Jersey, 07072.",
+    "all_mentions": [
+      "The shop is 77 Paterson Plank Road, Carlstadt, New Jersey, 07072.",
+      "We've also got a showroom in Montclair, zip 07042, but quote the shop."
+    ]
+  },
+  "industry_description": {
+    "value": "Custom kitchen cabinets and built-in joinery",
+    "source_quote": "Custom kitchen cabinets and built-in joinery, mostly for contractors.",
+    "all_mentions": [
+      "Custom kitchen cabinets and built-in joinery, mostly for contractors."
+    ]
+  },
+  "naics_code": {
+    "value": null,
+    "source_quote": null,
+    "all_mentions": [
+      "My accountant has it, I don't."
+    ]
+  },
+  "years_in_business": {
+    "value": "15",
+    "source_quote": "Since 2011.",
+    "all_mentions": [
+      "Since 2011."
+    ]
+  },
+  "annual_revenue": {
+    "value": "Five point four million",
+    "source_quote": "Five point four million.",
+    "all_mentions": [
+      "Five point four million."
+    ]
+  },
+  "employee_count": {
+    "value": "41",
+    "source_quote": "Sorry, 41, we hired three finishers last month.",
+    "all_mentions": [
+      "We're 38.",
+      "Sorry, 41, we hired three finishers last month."
+    ]
+  },
+  "coverage_types": {
+    "value": "general liability, property, workers comp",
+    "source_quote": "General liability, property and workers comp.",
+    "all_mentions": [
+      "General liability, property and workers comp."
+    ]
+  },
+  "effective_date": {
+    "value": "2027-04-01",
+    "source_quote": "The first of April next year.",
+    "all_mentions": [
+      "The first of April next year."
+    ]
+  },
+  "contact_name": {
+    "value": "Marco Bellini",
+    "source_quote": "Hi, is this Marco Bellini?",
+    "all_mentions": [
+      "Hi, is this Marco Bellini?",
+      "Thanks Marco, I'll be in touch."
+    ]
+  },
+  "contact_email": {
+    "value": "marco@hudsonmillwork.com",
+    "source_quote": "marco at hudson millwork dot com, all one word.",
+    "all_mentions": [
+      "marco at hudson millwork dot com, all one word."
+    ]
+  }
+}

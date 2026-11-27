@@ -13,10 +13,10 @@ class EmailChannelTest < ActiveSupport::TestCase
     assert_equal "application/pdf", mail.attachments.first.mime_type
     assert mail.attachments.first.body.decoded.start_with?("%PDF")
     body = mail.text_part.body.decoded
-    assert_includes body, "Brightpath IT Solutions Inc"
+    assert_includes body, "Hudson Millwork LLC"
     assert_includes body, "Submission ID:  #{@s.id}"
-    assert_includes body, "cyber liability, professional liability, general liability"
-    assert_includes body, "2027-02-15"
+    assert_includes body, "general liability, property, workers comp"
+    assert_includes body, "2027-04-01"
   end
 
   test "channel delivers the email and saves a sent QuoteRequest" do
@@ -33,7 +33,7 @@ class EmailChannelTest < ActiveSupport::TestCase
     sent = qr.reload.request_data
     assert_equal "broker@lead-intake.test", sent["from"]
     assert_equal "submissions@northwind.test", sent["to"]
-    assert_equal "New submission ##{@s.id}: Brightpath IT Solutions Inc", sent["subject"]
+    assert_equal "New submission ##{@s.id}: Hudson Millwork LLC", sent["subject"]
     assert_equal mail[:date].to_s, sent["date"]
     assert sent["date"].present?
     assert_equal mail.text_part.body.decoded, sent["body"]

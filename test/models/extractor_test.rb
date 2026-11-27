@@ -52,7 +52,7 @@ class ExtractorTest < ActiveSupport::TestCase
     sample = Sample.all.first
     result = extractor(error: Errno::ECONNREFUSED.new).call(sample[:transcript])
     assert result.used_fixtures
-    assert_equal "Golden Crust Bakery LLC", result.fields["business_name"]["value"]
+    assert_equal "Northgate Dental Studio PC", result.fields["business_name"]["value"]
   end
 
   test "falls back to empty fields for an unknown transcript when Ollama is unreachable" do
@@ -66,8 +66,10 @@ class ExtractorTest < ActiveSupport::TestCase
       fields = FieldChecker.new(s[:transcript], today: Date.new(2026, 11, 26)).categorise(Sample.fixture_for(s[:transcript]))
       [s[:key], fields.select { _1["category"] == "needs_approval" }.map { _1["name"] }]
     end
-    assert_equal %w[years_in_business], by_key["bakery"]
-    assert_equal %w[fein years_in_business contact_email], by_key["landscaping"]
-    assert_equal %w[years_in_business annual_revenue employee_count], by_key["it_services"]
+    assert_equal %w[northgate_dental hudson_millwork lumen_analytics], by_key.keys
+    assert_equal %w[years_in_business], by_key["northgate_dental"]
+    assert_equal %w[fein zip naics_code years_in_business annual_revenue employee_count effective_date contact_email],
+                 by_key["hudson_millwork"]
+    assert_equal %w[zip years_in_business], by_key["lumen_analytics"]
   end
 end

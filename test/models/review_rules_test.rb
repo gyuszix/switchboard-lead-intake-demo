@@ -8,7 +8,7 @@ class ReviewRulesTest < ActiveSupport::TestCase
     @s.reload
     assert @s.verified_fields.all? { _1["resolution"] == "confirmed" }
     assert @s.needs_approval_fields.all? { _1["resolution"].nil? }
-    assert_equal 10, @s.resolved_count
+    assert_equal 5, @s.resolved_count
   end
 
   test "approve is blocked on an invalid value" do
@@ -19,7 +19,7 @@ class ReviewRulesTest < ActiveSupport::TestCase
   test "approve accepts a valid value as-is" do
     assert_nil @s.approve!(:employee_count)
     assert_equal "approved", @s.reload.field(:employee_count)["resolution"]
-    assert_equal "45", @s.field(:employee_count)["value"]
+    assert_equal "41", @s.field(:employee_count)["value"]
   end
 
   test "edit re-validates the new value" do
@@ -28,11 +28,11 @@ class ReviewRulesTest < ActiveSupport::TestCase
   end
 
   test "edit stores the previous value and normalises the new one" do
-    assert_nil @s.edit!(:annual_revenue, "$4,200,000")
+    assert_nil @s.edit!(:annual_revenue, "$5,400,000")
     field = @s.reload.field(:annual_revenue)
     assert_equal "edited", field["resolution"]
-    assert_equal "4200000", field["value"]
-    assert_equal "four point two million", field["original_value"]
+    assert_equal "5400000", field["value"]
+    assert_equal "Five point four million", field["original_value"]
   end
 
   test "mark not provided clears the value" do
@@ -43,49 +43,49 @@ class ReviewRulesTest < ActiveSupport::TestCase
   end
 
   test "verified fields cannot be approved or cleared" do
-    assert_equal "Only fields that need approval can be changed", @s.approve!(:fein)
-    assert_equal "Only fields that need approval can be changed", @s.mark_not_provided!(:fein)
+    assert_equal "Only fields that need approval can be changed", @s.approve!(:business_name)
+    assert_equal "Only fields that need approval can be changed", @s.mark_not_provided!(:business_name)
   end
 
   test "editing a verified field sets edited and keeps original_value" do
-    assert_nil @s.edit!(:fein, "12-3456789")
-    field = @s.reload.field(:fein)
+    assert_nil @s.edit!(:business_name, "Hudson Millwork Inc")
+    field = @s.reload.field(:business_name)
     assert_equal "edited", field["resolution"]
-    assert_equal "12-3456789", field["value"]
-    assert_equal "82-6150347", field["original_value"]
+    assert_equal "Hudson Millwork Inc", field["value"]
+    assert_equal "Hudson Millwork LLC", field["original_value"]
     assert_equal "verified", field["category"]
 
-    assert_nil @s.edit!(:fein, "98-7654321")
-    assert_equal "82-6150347", @s.reload.field(:fein)["original_value"]
+    assert_nil @s.edit!(:business_name, "Hudson Millwork Co")
+    assert_equal "Hudson Millwork LLC", @s.reload.field(:business_name)["original_value"]
   end
 
   test "editing a confirmed verified field changes it to edited" do
     @s.confirm_all_verified!
-    assert_nil @s.edit!(:zip, "60174")
-    assert_equal "edited", @s.reload.field(:zip)["resolution"]
+    assert_nil @s.edit!(:address, "79 Paterson Plank Road, Carlstadt, New Jersey")
+    assert_equal "edited", @s.reload.field(:address)["resolution"]
   end
 
   test "confirm all does not overwrite edited verified fields" do
-    @s.edit!(:zip, "60174")
+    @s.edit!(:address, "79 Paterson Plank Road, Carlstadt, New Jersey")
     @s.confirm_all_verified!
     @s.reload
-    assert_equal "edited", @s.field(:zip)["resolution"]
-    assert_equal "confirmed", @s.field(:fein)["resolution"]
+    assert_equal "edited", @s.field(:address)["resolution"]
+    assert_equal "confirmed", @s.field(:business_name)["resolution"]
   end
 
   test "invalid edit of a verified field is rejected" do
-    assert_equal "ZIP must be 5 digits", @s.edit!(:zip, "601")
-    field = @s.reload.field(:zip)
+    assert_equal "Value is blank", @s.edit!(:address, " ")
+    field = @s.reload.field(:address)
     assert_nil field["resolution"]
-    assert_equal "60173", field["value"]
+    assert_equal "77 Paterson Plank Road, Carlstadt, New Jersey", field["value"]
   end
 
   test "approve and not provided are one-time, but resolved fields stay editable" do
     @s.mark_not_provided!(:employee_count)
     assert_equal "Already resolved", @s.approve!(:employee_count)
-    assert_nil @s.edit!(:employee_count, "45")
+    assert_nil @s.edit!(:employee_count, "41")
     field = @s.reload.field(:employee_count)
     assert_equal "edited", field["resolution"]
-    assert_equal "45", field["value"]
+    assert_equal "41", field["value"]
   end
 end

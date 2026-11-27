@@ -59,10 +59,7 @@ class SubmissionValidatorTest < ActiveSupport::TestCase
 
   test "builder output for a fully reviewed sample is valid" do
     s = create_sample_submission
-    s.confirm_all_verified!
-    s.approve!(:employee_count)
-    s.approve!(:years_in_business)
-    s.edit!(:annual_revenue, "4200000")
+    resolve_sample(s)
     assert SubmissionValidator.new.valid?(SubmissionBuilder.new(s).call)
   end
 end

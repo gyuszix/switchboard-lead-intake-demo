@@ -18,9 +18,9 @@ class SubmissionPdfTest < ActiveSupport::TestCase
 
   test "formats revenue, dates, coverages and empty fields from the submission JSON" do
     values = @pdf.sections.flat_map(&:last).to_h
-    assert_equal "cyber liability, professional liability, general liability", values["Coverage types"]
-    assert_equal "$4,200,000", values["Annual revenue"]
-    assert_equal "2027-02-15", values["Effective date"]
+    assert_equal "general liability, property, workers comp", values["Coverage types"]
+    assert_equal "$5,400,000", values["Annual revenue"]
+    assert_equal "2027-04-01", values["Effective date"]
     assert_equal "Not provided", values["Employee count"]
   end
 
