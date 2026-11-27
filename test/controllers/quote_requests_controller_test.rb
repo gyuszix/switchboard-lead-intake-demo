@@ -38,6 +38,30 @@ class QuoteRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "failed", @s.quote_requests.first.status
   end
 
+  test "email rows link to the sent PDF, served inline" do
+    make_ready
+    post submission_quote_requests_path(@s), params: { channel: "email" },
+      headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    qr = @s.quote_requests.first
+    path = document_submission_quote_request_path(@s, qr)
+    assert_select "turbo-stream[target=quote_requests] a[href=?]", path, "View sent PDF"
+
+    get path
+    assert_response :success
+    assert_equal "application/pdf", response.media_type
+    assert_match(/\Ainline/, response.headers["Content-Disposition"])
+    assert_equal qr.document.b, response.body.b
+  end
+
+  test "rows without a document have no PDF link and 404" do
+    make_ready
+    qr = @s.quote_requests.create!(channel: "api", carrier: "Acme Insurance", status: "quoted")
+    get ready_submission_path(@s)
+    assert_select "a", text: "View sent PDF", count: 0
+    get document_submission_quote_request_path(@s, qr)
+    assert_response :not_found
+  end
+
   test "unknown channel is 404" do
     make_ready
     post submission_quote_requests_path(@s), params: { channel: "fax" }

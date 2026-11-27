@@ -5,6 +5,12 @@
   <td><span class="badge status-<%= quote_request.status %>"><%= quote_request.status.humanize %></span></td>
   <td><%= number_to_currency(quote_request.premium, precision: 0) if quote_request.premium %></td>
   <td><%= quote_request.reference %></td>
-  <td><%= quote_request.message %></td>
+  <td>
+    <%= quote_request.message %>
+    <% if quote_request.document.present? %>
+      <div><%= link_to "View sent PDF", document_submission_quote_request_path(quote_request.submission, quote_request),
+                 target: "_blank", rel: "noopener", data: { turbo: false } %></div>
+    <% end %>
+  </td>
   <td class="counter"><%= quote_request.created_at&.strftime("%H:%M:%S") %></td>
 </tr>

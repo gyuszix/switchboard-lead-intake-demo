@@ -6,9 +6,12 @@ module Channels
 
     private
 
+    # Renders the PDF once: the same bytes are attached and kept on the
+    # QuoteRequest, so the broker can see exactly what was sent.
     def deliver(_json)
-      CarrierSubmissionMailer.with(submission: @submission).submission.deliver_now
-      { status: "sent", message: "Awaiting carrier reply" }
+      pdf = SubmissionPdf.new(@submission).render
+      CarrierSubmissionMailer.with(submission: @submission, pdf: pdf).submission.deliver_now
+      { status: "sent", message: "Awaiting carrier reply", document: pdf }
     end
   end
 end

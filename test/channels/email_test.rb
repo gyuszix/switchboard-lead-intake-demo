@@ -27,6 +27,13 @@ class EmailChannelTest < ActiveSupport::TestCase
                  [qr.status, qr.message, qr.carrier, qr.channel]
   end
 
+  test "the attached PDF is the one kept on the QuoteRequest" do
+    qr = Channels::Email.new.call(@s)
+    attached = ActionMailer::Base.deliveries.last.attachments.first.body.decoded
+    assert qr.reload.document.start_with?("%PDF")
+    assert_equal attached.b, qr.document.b
+  end
+
   test "channel is refused when the submission is not ready" do
     @s.edit!(:zip, "60174")
     qr = Channels::Email.new.call(@s)
