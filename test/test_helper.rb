@@ -1,6 +1,8 @@
 ENV["RAILS_ENV"] ||= "test"
 # Tests never talk to Ollama: point any accidental call at a closed port.
 ENV["OLLAMA_URL"] = "http://127.0.0.1:9"
+# ...and never reach the mock carriers over the network either.
+ENV["MOCK_CARRIER_BASE_URL"] = "http://127.0.0.1:9"
 require_relative "../config/environment"
 require "rails/test_help"
 
@@ -20,6 +22,17 @@ module ActiveSupport
         transcript: sample[:transcript],
         fields: FieldChecker.new(sample[:transcript], today: Date.new(2026, 11, 26)).categorise(Sample.fixture_for(sample[:transcript]))
       )
+    end
+
+    # The IT services sample, fully reviewed and built: ready to send.
+    def create_ready_submission
+      s = create_sample_submission
+      s.confirm_all_verified!
+      s.approve!(:employee_count)
+      s.approve!(:years_in_business)
+      s.edit!(:annual_revenue, "4200000")
+      raise "sample did not build" unless s.build_submission!.empty?
+      s
     end
 
     # Replaces Extractor#call for the duration of the block.

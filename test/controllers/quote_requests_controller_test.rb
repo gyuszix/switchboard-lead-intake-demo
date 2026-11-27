@@ -27,6 +27,17 @@ class QuoteRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_match "fails the schema", response.body
   end
 
+  test "running a channel prepends a quote request row via Turbo Stream" do
+    make_ready
+    post submission_quote_requests_path(@s), params: { channel: "api" },
+      headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    assert_response :success
+    assert_select "turbo-stream[action=prepend][target=quote_requests] td", "Acme Insurance"
+    assert_select "turbo-stream[action=remove][target=quote_requests_empty]"
+    # The test environment has no carrier to reach, so the channel records a failure instead of raising.
+    assert_equal "failed", @s.quote_requests.first.status
+  end
+
   test "unknown channel is 404" do
     make_ready
     post submission_quote_requests_path(@s), params: { channel: "fax" }
