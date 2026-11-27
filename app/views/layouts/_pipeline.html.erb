@@ -1,0 +1,19 @@
+<%# locals: (pipeline:) %>
+<nav id="pipeline" class="pipeline" aria-label="Submission pipeline" data-controller="pipeline"
+     data-action="turbo:submit-start@document->pipeline#start turbo:submit-end@document->pipeline#stop">
+  <ol class="pipeline-steps">
+    <% pipeline.steps.each do |step| %>
+      <li><%= pipeline_step_tag(step, pipeline) %></li>
+    <% end %>
+    <li class="pipeline-fork">
+      <svg class="pipeline-fork-arrows" viewBox="0 0 24 84" width="24" height="84" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M0 42h8 M8 42C14 42 14 12 22 12 M8 42h14 M8 42C14 42 14 72 22 72"/>
+      </svg>
+      <ol class="pipeline-channels">
+        <% pipeline.channels.each do |step| %>
+          <li><%= pipeline_step_tag(step, pipeline) %></li>
+        <% end %>
+      </ol>
+    </li>
+  </ol>
+</nav>

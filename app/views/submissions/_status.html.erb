@@ -5,7 +5,8 @@
     <%= link_to "Ready to send →", ready_submission_path(submission), class: "button" %>
   <% end %>
   <% if submission.all_resolved? %>
-    <%= button_to "Approve and build submission", build_submission_path(submission), class: "button primary", form_class: "inline-form" %>
+    <%= button_to "Approve and build submission", build_submission_path(submission), class: "button primary", form_class: "inline-form",
+          form: { data: { pipeline_step: "build schema" } } %>
   <% else %>
     <button type="button" class="button primary" disabled title="Resolve every field first">Approve and build submission</button>
   <% end %>

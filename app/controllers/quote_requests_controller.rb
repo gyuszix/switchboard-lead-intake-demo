@@ -24,7 +24,8 @@ class QuoteRequestsController < ApplicationController
       format.turbo_stream do
         render turbo_stream: [
           turbo_stream.remove("quote_requests_empty"),
-          turbo_stream.prepend("quote_requests", partial: "quote_requests/quote_request", locals: { quote_request: quote_request })
+          turbo_stream.prepend("quote_requests", partial: "quote_requests/quote_request", locals: { quote_request: quote_request }),
+          turbo_stream.replace("pipeline", partial: "layouts/pipeline", locals: { pipeline: PipelineState.new(page: :ready, submission: submission) })
         ]
       end
       format.html { redirect_to ready_submission_path(submission), status: :see_other }

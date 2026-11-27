@@ -1,0 +1,84 @@
+require "test_helper"
+
+class PipelineBarTest < ActionDispatch::IntegrationTest
+  def resolve_all(s)
+    s.confirm_all_verified!
+    s.approve!(:employee_count)
+    s.approve!(:years_in_business)
+  end
+
+  test "every page renders the bar with actor labels and gate markers" do
+    get root_path
+    assert_select "nav#pipeline.pipeline[aria-label=?]", "Submission pipeline" do
+      assert_select ".pipeline-step", 10
+      assert_select ".pipeline-step .pipeline-actor", text: /AI \(Granite\)/, count: 1
+      assert_select ".pipeline-step .pipeline-actor", text: /Human/, count: 2
+      assert_select ".pipeline-step .pipeline-actor", text: /Code/, count: 6
+      assert_select ".pipeline-step .pipeline-actor", text: /Input/, count: 1
+      assert_select ".pipeline-step .pipeline-actor svg.pipeline-icon", 10
+      assert_select ".pipeline-step.gate", 3
+      assert_select ".pipeline-step.gate .pipeline-gate-icon", 3
+      assert_select ".pipeline-step:not(.gate) .pipeline-gate-icon", 0
+      assert_select ".pipeline-step.gate[data-pipeline-key=transcript_check][title=?]",
+                    "Quote exists in transcript, value appears in quote, format rules, no conflicting mentions. Advisory: sorts fields into Verified / Needs approval"
+      assert_select ".pipeline-step.gate[data-pipeline-key=review][title=?]",
+                    "A human approves, edits or marks every field. Nothing proceeds until every field is resolved"
+      assert_select ".pipeline-step.gate[data-pipeline-key=schema][title=?]",
+                    "Submission JSON must match the schema: all fields present, correct types and formats. Blocking"
+      assert_select ".pipeline-step:not([title])", 0
+      assert_select "[aria-current=step]", 1
+      assert_select ".pipeline-step.state-active[data-pipeline-key=transcript][aria-current=step]"
+    end
+  end
+
+  test "review page: broker review is the active step" do
+    s = create_sample_submission
+    get submission_path(s)
+    assert_select ".pipeline-step.state-done", 3
+    assert_select ".pipeline-step.state-active[data-pipeline-key=review][aria-current=step]"
+  end
+
+  test "a failed build shows the schema check failed" do
+    s = create_sample_submission
+    resolve_all(s)
+    s.mark_not_provided!(:annual_revenue)
+    post build_submission_path(s)
+    assert_response :unprocessable_entity
+    assert_select ".pipeline-step.state-failed[data-pipeline-key=schema]"
+    assert_select ".pipeline-step.state-active[data-pipeline-key=review]"
+  end
+
+  test "ready page shows each channel's latest result, and a channel call replaces the bar" do
+    s = create_ready_submission
+    s.quote_requests.create!(channel: "api", carrier: "Acme Insurance", status: "quoted")
+    get ready_submission_path(s)
+    assert_select ".pipeline-step.state-done", 6
+    assert_select ".pipeline-step.state-active[data-pipeline-key=channel][aria-current=step]"
+    assert_select ".pipeline-step.state-quoted[data-pipeline-key=channel_api]", /Quoted/
+    assert_select ".pipeline-step.state-pending[data-pipeline-key=channel_email]"
+
+    post submission_quote_requests_path(s), params: { channel: "email" }, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    assert_select "turbo-stream[action=replace][target=pipeline] .pipeline-step.state-sent[data-pipeline-key=channel_email]"
+  end
+
+  test "the extract, build and channel forms name their pipeline step" do
+    get root_path
+    assert_select "form[data-pipeline-step=extract][action=?]", submissions_path
+
+    s = create_sample_submission
+    resolve_all(s)
+    s.edit!(:annual_revenue, "4200000")
+    get submission_path(s)
+    assert_select "form[data-pipeline-step=?][action=?]", "build schema", build_submission_path(s)
+
+    s.build_submission!
+    get ready_submission_path(s)
+    %w[api portal email].each do |channel|
+      assert_select "form[data-pipeline-step=?] input[name=channel][value=?]", "channel_#{channel}", channel
+    end
+    # Every name maps to a step in the bar.
+    %w[extract build schema channel_api channel_portal channel_email].each do |key|
+      assert_select "#pipeline [data-pipeline-key=?]", key
+    end
+  end
+end

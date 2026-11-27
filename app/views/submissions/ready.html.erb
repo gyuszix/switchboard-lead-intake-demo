@@ -12,7 +12,8 @@
 <div class="actions-row">
   <% { "api" => "Get quote via Acme API", "portal" => "Get quote via Beacon portal", "email" => "Email submission to Northwind" }.each do |channel, label| %>
     <%= button_to label, submission_quote_requests_path(@submission), params: { channel: channel },
-          class: "button primary", form_class: "inline-form", data: { turbo_submits_with: "Working…" } %>
+          class: "button primary", form_class: "inline-form", data: { turbo_submits_with: "Working…" },
+          form: { data: { pipeline_step: "channel_#{channel}" } } %>
   <% end %>
 </div>
 

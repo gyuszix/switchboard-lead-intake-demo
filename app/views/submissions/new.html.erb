@@ -8,7 +8,7 @@
   <% end %>
 </div>
 
-<%= form_with url: submissions_path, class: "paste-form" do |f| %>
+<%= form_with url: submissions_path, class: "paste-form", data: { pipeline_step: "extract" } do |f| %>
   <% if @error %><p class="error"><%= @error %></p><% end %>
   <%= f.text_area :transcript, value: @transcript, placeholder: "Broker: ...\nClient: ...", aria: { label: "Transcript" } %>
   <div class="actions-row">
