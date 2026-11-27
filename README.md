@@ -10,10 +10,10 @@ flowchart LR
     subgraph CANVAS[" "]
         T([⛁ Call transcript])
         E[✦ AI · Extract fields<br/>Granite via Ollama]
-        TC{{⚙ CODE · Transcript check<br/>◆ CHECK}}
-        R{{◉ HUMAN · Broker review<br/>◆ APPROVAL}}
+        TC{{⚙ CODE · Transcript check<br/>◆ CHECKPOINT}}
+        R{{◉ HUMAN · Broker review<br/>◆ GATE}}
         B[⚙ CODE · Build JSON]
-        SC{{⚙ CODE · Schema check<br/>◆ VALIDATION}}
+        SC{{⚙ CODE · Schema check<br/>◆ GATE}}
         CH[◉ HUMAN · Choose channel]
         API[⚙ CODE · Acme API client]
         BOT[⚙ CODE · Beacon portal bot]
@@ -42,7 +42,7 @@ flowchart LR
             L1[✦ AI]
             L2[⚙ Code]
             L3[◉ Human]
-            L4{{◆ Checkpoint}}
+            L4{{◆ Checkpoint / Gate}}
         end
     end
 
@@ -72,17 +72,18 @@ flowchart LR
 
 AI touches the data once, at the start. Everything after it is code proving something or a human deciding.
 
-## How everything is checked
+## Pipeline validation
 
-The model's output is treated as a claim, not an answer. It is never asked for a confidence score, since a model's opinion of itself is just another unverified claim.
+The model's output is treated as a claim, not an answer. A **checkpoint** flags what code can't prove; a **gate** stops anything moving on until it passes.
 
-| Checkpoint | Who | What it checks | Blocks? |
+| Step | Who | Type | What it does |
 | --- | --- | --- | --- |
-| Transcript check | Code | For each field: a value exists, the model's quote is actually in the transcript, the value appears in that quote, it passes format rules (FEIN, NAICS, ZIP, email, dates), and no other mention contradicts it. Durations like "fifth year" always go to the broker | No. Sorts fields into **Verified** or **Needs approval**, with a plain-English reason for each failure |
-| Broker review | Human | Confirms verified fields in one click; approves, edits or marks each remaining field. Edits are re-validated | Yes. Nothing is built until every field is resolved |
-| Schema check | Code | The built submission JSON against `config/schemas/submission_v1.json`: every field present, correct types and formats | Yes. Nothing reaches a carrier until it passes, and it's re-checked before every send |
+| Extract fields | AI | | Pulls each field's value and the exact quote it came from. Never trusted on its own |
+| Transcript check | Code | Checkpoint | Quote exists in the transcript, value appears in the quote, valid format, no conflicting mentions |
+| Broker review | Human | Gate | Approves, edits or fills every field before anything is built |
+| Schema check | Code | Gate | Every field present with the right type and format before anything reaches a carrier |
 
-Code proves a value wasn't invented. The broker confirms it's right. The schema guarantees every carrier channel gets the same well-formed record.
+Code proves a value wasn't invented. The broker confirms it's right. The schema guarantees every carrier gets the same well-formed record.
 
 ## Install and run
 
