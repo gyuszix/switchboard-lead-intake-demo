@@ -186,7 +186,7 @@ textarea { min-height: 360px; font-family: ui-monospace, Menlo, monospace; font-
 .badge.status-referred { background: var(--amber-bg); color: var(--amber); }
 .exchange summary { cursor: pointer; color: var(--primary); margin-top: 4px; }
 .exchange-label { font-weight: 600; margin-top: 8px; color: var(--muted); }
-.exchange pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px; margin: 4px 0; font-size: 0.8rem; max-width: 520px; overflow-x: auto; }
+.exchange pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px; margin: 4px 0; font-size: 0.8rem; max-width: 520px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .exchange-table { border-collapse: collapse; font-size: 0.8rem; margin: 4px 0; }
 .exchange-table th, .exchange-table td { border: 1px solid var(--border); padding: 4px 6px; }
 .exchange-list { margin: 4px 0; padding-left: 18px; }
