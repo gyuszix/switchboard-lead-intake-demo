@@ -1,0 +1,9 @@
+<h1>Sign in</h1>
+<% if @error %><div class="alert-error"><%= @error %></div><% end %>
+<%= form_with url: mock_carriers_beacon_login_path, id: "login", local: true do %>
+  <label for="username">Username</label>
+  <input type="text" name="username" id="username">
+  <label for="password">Password</label>
+  <input type="password" name="password" id="password">
+  <button type="submit">Sign in</button>
+<% end %>

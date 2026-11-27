@@ -1,0 +1,11 @@
+<h1>Application Result</h1>
+<% if @decision[:status] == "quoted" %>
+  <table id="quote-result">
+    <tr><th>Reference</th><td><%= @reference %></td></tr>
+    <tr><th>Status</th><td>Quoted</td></tr>
+    <tr><th>Premium</th><td><%= number_to_currency(@decision[:premium]) %></td></tr>
+  </table>
+<% else %>
+  <div class="alert-error"><%= @decision[:status].capitalize %>: <%= @decision[:reason] %></div>
+<% end %>
+<p><a href="<%= mock_carriers_beacon_new_application_path %>">Start another application</a></p>

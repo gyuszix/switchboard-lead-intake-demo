@@ -1,0 +1,21 @@
+<h1>New Commercial Application</h1>
+<%= form_with url: mock_carriers_beacon_applications_path, id: "new_application", local: true do %>
+  <% [["insured_legal_entity", "Insured Legal Entity"], ["tax_id_no", "Tax ID No."], ["street_address", "Street Address"],
+      ["zip_code", "ZIP Code"], ["naics", "NAICS"], ["gross_annual_sales", "Gross Annual Sales"],
+      ["number_of_employees", "Number of Employees"], ["effective_date", "Effective Date"]].each do |name, label| %>
+    <label for="<%= name %>"><%= label %></label>
+    <input type="text" name="<%= name %>" id="<%= name %>" value="<%= @values[name] %>"
+           <% if name == "effective_date" %>placeholder="MM/DD/YYYY"<% end %>>
+    <% if @errors[name] %><div class="field-error" data-field="<%= name %>"><%= @errors[name] %></div><% end %>
+  <% end %>
+  <fieldset>
+    <legend>Coverages</legend>
+    <% MockCarriers::BeaconController::COVERAGES.each do |value, label| %>
+      <input type="checkbox" name="coverages[]" value="<%= value %>" id="coverage_<%= value %>"
+             <%= "checked" if Array(@values["coverages"]).include?(value) %>>
+      <label for="coverage_<%= value %>"><%= label %></label>
+    <% end %>
+    <% if @errors["coverages"] %><div class="field-error" data-field="coverages"><%= @errors["coverages"] %></div><% end %>
+  </fieldset>
+  <button type="submit">Submit application</button>
+<% end %>
