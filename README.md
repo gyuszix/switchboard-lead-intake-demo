@@ -1,131 +1,102 @@
 # Lead Intake Demo
 
-An AI extracts a commercial insurance intake form from a call transcript, but the AI never gets the final say.
-
-Every field is either **proven correct by deterministic code against the transcript**, or **approved by a human broker**. Only then is a submission built, and it must pass a JSON Schema before it can be sent anywhere.
+An AI extracts a commercial insurance intake form from a sales call transcript, but it never gets the final say. Every value is either proven against the transcript by code or approved by a broker, and the result must pass a JSON Schema before it can reach a carrier.
 
 ## Pipeline
 
-1. **Agent extraction:** transcript → raw JSON. `Extractor` sends the transcript to a local Ollama model, which returns, for each of 13 fields, a `value`, a `source_quote` and `all_mentions` (every verbatim quote mentioning the field). `FieldChecker` sorts each field into **Verified** or **Needs approval**, with a plain-English reason for every check that failed.
-2. **Broker review:** one click confirms all verified fields; each needs-approval field is approved as-is, edited, or marked not provided. Any field can be edited.
-3. **Build:** once all 13 fields are resolved, **Approve and build submission** turns the broker-approved values into the submission JSON (`SubmissionBuilder`): integers for numbers, an array for coverage types, `YYYY-MM-DD` for the date, `null` for "Not provided". A value that can't be converted is kept raw, never guessed or fixed.
-4. **Deterministic check:** `SubmissionValidator` validates the submission JSON against `config/schemas/submission_v1.json`. If it fails, nothing is saved: the review page lists each failing field in plain English and highlights its row. If it passes, the submission is saved and shown on the **Ready to send** page.
-5. **Channel choice:** on the Ready to send page, send the submission to a carrier by API, portal bot or email (see [Channels](#channels)).
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Helvetica, Arial, sans-serif", "lineColor": "#64748b", "fontSize": "14px"}}}%%
+flowchart LR
+    T([⛁ Call transcript])
+    E[✦ AI · Extract fields<br/>Granite via Ollama]
+    TC{{⚙ CODE · Transcript check<br/>◆ CHECK}}
+    R{{◉ HUMAN · Broker review<br/>◆ APPROVAL}}
+    B[⚙ CODE · Build JSON]
+    SC{{⚙ CODE · Schema check<br/>◆ VALIDATION}}
+    CH[◉ HUMAN · Choose channel]
+    API[⚙ CODE · Acme API client]
+    BOT[⚙ CODE · Beacon portal bot]
+    EM[⚙ CODE · Email + PDF]
+    ACME[(Acme Insurance)]
+    BEACON[(Beacon Mutual)]
+    NW[(Northwind Specialty)]
 
-The raw JSON is the model's claim. The submission JSON is the broker-approved record, and is the only thing that will ever leave the app.
+    T --> E
+    E --> TC
+    TC --> R
+    R --> B
+    B --> SC
+    SC --> CH
+    SC -. "fails" .-> R
+    CH -. "edit values" .-> R
+    CH --> API
+    API --> ACME
+    CH --> BOT
+    BOT --> BEACON
+    CH --> EM
+    EM --> NW
 
-## Running it
+    subgraph LEGEND[" "]
+        direction LR
+        L1[✦ AI]
+        L2[⚙ Code]
+        L3[◉ Human]
+        L4{{◆ Checkpoint}}
+    end
 
-Requirements: Ruby 4.0, Rails 8, and [Ollama](https://ollama.com) with `granite4.2:8b` pulled.
+    classDef input fill:#f1f5f9,stroke:#94a3b8,color:#334155
+    classDef ai fill:#ede4ff,stroke:#7c3aed,color:#3b0764
+    classDef code fill:#e0ecff,stroke:#2563eb,color:#1e3a8a
+    classDef codeCheck fill:#e0ecff,stroke:#1d4ed8,color:#1e3a8a,stroke-width:3px
+    classDef human fill:#fff1d6,stroke:#d97706,color:#78350f
+    classDef humanCheck fill:#fff1d6,stroke:#b45309,color:#78350f,stroke-width:3px
+    classDef carrier fill:#f8fafc,stroke:#64748b,color:#334155,stroke-dasharray:4 3
+    classDef legendCheck fill:#ffffff,stroke:#334155,color:#334155,stroke-width:3px
 
-On a new Mac, `./install.sh` sets all of that up: Ruby 4.0, Ollama, the Granite model, the gems and the database. It doesn't leave Ollama running; `./run.sh` does that. It skips anything already installed. Homebrew is optional: if it's installed, Ruby and Ollama come from it (and it's added to `~/.zprofile`); if not, the script offers to install it. Without Homebrew, Ruby is installed with mise or rbenv if you have one (otherwise the script says what to install), and Ollama comes from [ollama.com/download](https://ollama.com/download). Ollama itself is optional too: without it the samples use built-in fixtures.
+    class T input
+    class E,L1 ai
+    class B,API,BOT,EM,L2 code
+    class TC,SC codeCheck
+    class CH,L3 human
+    class R humanCheck
+    class ACME,BEACON,NW carrier
+    class L4 legendCheck
 
-```sh
-./install.sh            # one-time setup on a new Mac
-./run.sh                # installs gems, prepares the database, starts Ollama and http://localhost:3000
-bin/rails test          # fast and offline; never calls Ollama
+    linkStyle 6 stroke:#dc2626,stroke-width:2px,stroke-dasharray:5 5
+    linkStyle 7 stroke:#d97706,stroke-width:2px,stroke-dasharray:5 5
+    style LEGEND fill:#ffffff,stroke:#e2e8f0
 ```
 
-Configuration (optional):
+AI touches the data once, at the start. Everything after it is code proving something or a human deciding.
 
-| Variable       | Default                  |
-| -------------- | ------------------------ |
-| `OLLAMA_URL`   | `http://localhost:11434` |
-| `OLLAMA_MODEL` | `granite4.2:8b`          |
+## How everything is checked
 
-`./run.sh` starts Ollama if it isn't running: the Ollama app if you have it, otherwise `ollama serve`, which it stops again when you press Ctrl+C. It also warns if the model hasn't been pulled. If Ollama is unreachable, the three sample transcripts fall back to hardcoded fixture extractions (`config/samples/*.json`) and the review page says so. Any other transcript comes back with every field empty, needing approval.
+The model's output is treated as a claim, not an answer. It is never asked for a confidence score, since a model's opinion of itself is just another unverified claim.
 
-Extraction runs synchronously and can take up to a minute on a laptop.
+| Checkpoint | Who | What it checks | Blocks? |
+| --- | --- | --- | --- |
+| Transcript check | Code | For each field: a value exists, the model's quote is actually in the transcript, the value appears in that quote, it passes format rules (FEIN, NAICS, ZIP, email, dates), and no other mention contradicts it. Durations like "fifth year" always go to the broker | No. Sorts fields into **Verified** or **Needs approval**, with a plain-English reason for each failure |
+| Broker review | Human | Confirms verified fields in one click; approves, edits or marks each remaining field. Edits are re-validated | Yes. Nothing is built until every field is resolved |
+| Schema check | Code | The built submission JSON against `config/schemas/submission_v1.json`: every field present, correct types and formats | Yes. Nothing reaches a carrier until it passes, and it's re-checked before every send |
 
-## Categorisation rules
+Code proves a value wasn't invented. The broker confirms it's right. The schema guarantees every carrier channel gets the same well-formed record.
 
-A field is **Verified** only if all of these hold:
+## Install and run
 
-1. The value is not null.
-2. The `source_quote` is found in the transcript, after normalising case, whitespace and punctuation (matched on word boundaries).
-3. The value appears inside that quote. Numeric fields (FEIN, ZIP, NAICS, years, revenue, employees) compare digits only. Dates match ISO, `M/D/YYYY` or `January 15th, 2027` spellings. Coverage types must each appear.
-4. The value passes format validation:
-   - FEIN `NN-NNNNNNN`, NAICS 6 digits, ZIP 5 digits
-   - years in business, annual revenue, employee count numeric and > 0
-   - email in basic email format; effective date a valid `YYYY-MM-DD`, not in the past
-5. Every quote in `all_mentions` is found in the transcript, and none contains a different value. Conflicts are detected for structured fields (the numeric fields, email, date), where code can tell values apart. Free-text fields only need their mentions to exist.
+Requires Ruby 4.0, Rails 8 and [Ollama](https://ollama.com) with `granite4.2:8b`. Ollama is optional: without it, the sample transcripts use built-in fixture extractions.
 
-Anything else is **Needs approval**, with reasons such as *Not stated in call*, *Quote not found in transcript*, *Value not in quote*, *FEIN format invalid*, *Conflicting mentions in transcript*.
+```sh
+./install.sh     # one-time setup on a new Mac
+./run.sh         # starts Ollama and the app at http://localhost:3000
+bin/rails test   # offline; never calls Ollama
+```
 
-Review rules:
+## Examples
 
-- **Confirm all verified** resolves every verified field in one click and never touches needs-approval fields.
-- **Approve as-is** is allowed only if the value passes format validation.
-- **Edit** re-validates the new value and keeps the previous one in `original_value`.
-- **Mark not provided** clears the value. The schema requires every field, so a "Not provided" field blocks the build until the broker edits in a value.
-- Approve and Mark not provided are one-time decisions. Edit is available on every field, resolved or not.
-- **Approve and build submission** is disabled until all fields are resolved, and the server refuses the build with **422** regardless of what the UI shows.
-- Editing any field after a submission is built clears it; the broker must build again.
+Three sample transcripts are preloaded on the start page.
 
-## Submission schema
-
-`config/schemas/submission_v1.json` (JSON Schema 2020-12) is the contract:
-
-- every field required and non-null; `additionalProperties: false` at every level
-- FEIN `^\d{2}-\d{7}$`, NAICS `^\d{6}$`, ZIP `^\d{5}$`
-- annual revenue, employee count, years in business: integers, minimum 1
-- coverage types: a non-empty array of non-empty strings
-- effective date `format: date`, contact email `format: email`
-
-The schema checks format only. Value checks like "date not in the past" stay in the review stage.
-
-## Channels
-
-Three mock carriers live inside this app (`app/controllers/mock_carriers/`, under `/mock_carriers`). They stand in for real carrier systems and share nothing with the channel code except a small deterministic pricing module (`MockCarriers::Pricing`). The channels call them over real HTTP at `MOCK_CARRIER_BASE_URL` (default `http://localhost:3000`). The dev server runs 3 Puma threads, so the app can call itself.
-
-Before any channel runs, the stored submission JSON is re-validated against the schema, and the channel refuses (422) if it fails or the submission is no longer ready. Each attempt is saved as a `QuoteRequest` (quoted / declined / referred / sent / failed) and added to the Quote requests list. Channels never raise to the UI: timeouts, bad responses and unexpected pages become `failed` with a clear message.
-
-| Channel | Mock carrier | How it works |
-| --- | --- | --- |
-| `Channels::Api` | **Acme Insurance**: JSON API at `POST /mock_carriers/acme/api/v1/quotes`, bearer token (`ACME_API_TOKEN`, default `acme-demo-token`) | Maps the submission JSON to Acme's field names, POSTs it, and interprets 201 quoted / 200 declined or referred / 401 / 422 / 503. A business named "Acme Test Outage" triggers the 503. |
-| `Channels::Portal` | **Beacon Mutual**: HTML broker portal with session login (`BEACON_USERNAME` / `BEACON_PASSWORD`, default `broker` / `beacon-demo`) | A Mechanize bot logs in, fills the application form by field name (`950,000` sales, `MM/DD/YYYY` date), ticks coverage checkboxes by label text, submits, and parses the result page. A coverage with no checkbox (e.g. commercial auto, cyber) stops it before submitting. The row's **Steps / scraped** section shows each request and status, every field filled (and where in the submission JSON it came from), and each value read from the result page with its HTML. The password and cookies are never recorded. |
-| `Channels::Email` | **Northwind Specialty**: `submissions@northwind.test` | Emails a plain-text summary with the application PDF attached. In development emails are written to `tmp/mails`. The row's **Sent** section shows the headers, body and attachment exactly as sent; the attachment links to the stored PDF bytes. Status is `sent`, "Awaiting carrier reply"; no reply is simulated. |
-
-Both quoting carriers use the same rules: decline any coverage they don't offer, refer annual revenue over $5,000,000, otherwise quote. Each channel translates our coverage names (e.g. "workers compensation") into its carrier's vocabulary ("workers comp", "Workers Comp").
-
-**Trade-offs.** The API is fast and structured: typed fields, explicit status codes, and an unambiguous result. The portal bot works where a carrier has no API, but it depends on page layout: a renamed field, label or result table breaks it, which is why it checks every step and fails loudly. Email works with any carrier, but nothing comes back automatically: the outcome depends on a human replying.
-
-## Why
-
-**The model's output is treated as a claim to be proven, not an answer.** A field is never trusted because the model said so, only because code proved it against the transcript or a human approved it.
-
-That's why the model is never asked for a confidence score: a model's opinion of itself is just another unverified claim. A quote is useful because code can check it. If the quote isn't in the transcript, or the value isn't in the quote, the claim fails, however confident the model sounded.
-
-The samples show this:
-
-- **Northgate Dental (happy path):** everything is stated plainly, and every field verifies except years in business, which always needs a broker. Acme and Beacon both quote it.
-- **Hudson Millwork (AI caught):** a noisy call. The FEIN is spoken as words, the NAICS code is never given, revenue is in words, the employee count is corrected mid-call (38, then 41), a second location's ZIP is mentioned, the start date is "the first of April next year", and the email is spelled out. Code can prove none of those, so all eight go to the broker. Revenue over $5M means both quoting carriers refer it.
-- **Lumen Analytics (channels differ):** clean, except a ZIP+4 (`07302-3911`) that fails the 5-digit rule. Once fixed, Acme quotes it, but Beacon's portal has no cyber checkbox, so the bot stops before submitting.
-
-The pipeline keeps three roles apart:
-
-- **The model's output is a claim.** It is never sent anywhere.
-- **The broker approves the values.** Code proves what it can against the transcript; a human decides the rest.
-- **The JSON Schema is the contract.** Whatever channel carries a submission to a carrier (email PDF, portal bot or API) can rely on the same validated, typed record, without re-checking the transcript or trusting the model.
-
-The checks are conservative on purpose. A false "needs approval" costs a broker a click; a false "verified" puts wrong data on an application.
-
-Fields that require interpretation (like durations relative to the call date) are never auto-verified.
-
-## Code map
-
-- `app/models/extractor.rb`: all Ollama code (Net::HTTP, JSON schema, defensive parsing, fixture fallback)
-- `app/models/field_checker.rb`: the categorisation rules and format validation
-- `app/models/submission.rb`: the field structure and review rules
-- `app/models/submission_builder.rb`: approved values → typed submission JSON
-- `app/models/submission_validator.rb` and `config/schemas/submission_v1.json`: the schema check and its plain-English errors
-- `app/models/submission_pdf.rb`: the Prawn PDF, built from the submission JSON for the email channel
-- `app/models/channels/`: the API, portal bot and email channels; `app/models/quote_request.rb` records each attempt
-- `app/controllers/mock_carriers/`: the fake Acme API, Beacon portal and shared pricing
-- `config/samples/`: sample transcripts and fixture extractions
-
-## Next steps (not built)
-
-- Duplicate submission check before carrier submission
-- ACORD 125 export
-- Tracking how often brokers edit each field, to find where extraction is weakest
+| Sample | What happens in review | Acme API | Beacon bot | Northwind email |
+| --- | --- | --- | --- | --- |
+| **Northgate Dental** (happy path) | Everything verifies except years in business | Quoted, $23,800 | Quoted, $23,800 | Sent |
+| **Hudson Millwork** (AI caught) | Eight fields go to the broker: FEIN spoken as words, NAICS never given, revenue in words, headcount corrected mid-call, a second location's ZIP, "first of April next year", a spelled-out email, years in business | Referred (revenue over $5M) | Referred | Sent |
+| **Lumen Analytics** (channels differ) | ZIP+4 fails the format check until the broker fixes it | Quoted, $8,700 | Failed: no cyber option on the portal | Sent |
