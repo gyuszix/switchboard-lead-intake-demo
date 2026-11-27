@@ -34,6 +34,11 @@ class EmailChannelTest < ActiveSupport::TestCase
     assert_equal attached.b, qr.document.b
   end
 
+  test "letter_opener is gone, so sending never opens a browser tab" do
+    refute_match(/letter_opener/, Rails.root.join("Gemfile").read)
+    assert_equal :test, ActionMailer::Base.delivery_method
+  end
+
   test "channel is refused when the submission is not ready" do
     @s.edit!(:zip, "60174")
     qr = Channels::Email.new.call(@s)

@@ -71,4 +71,3 @@ gem "json_schemer", ">= 2.5"
 
 gem "mechanize", ">= 2.14"
 
-gem "letter_opener", ">= 1.10", group: :development

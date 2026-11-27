@@ -34,8 +34,10 @@ Rails.application.configure do
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
 
-  # Carrier emails open in the browser instead of being sent.
-  config.action_mailer.delivery_method = :letter_opener
+  # Carrier emails are written to tmp/mails instead of being sent; the quote
+  # request row shows what was sent.
+  config.action_mailer.delivery_method = :file
+  config.action_mailer.file_settings = { location: Rails.root.join("tmp/mails") }
   config.action_mailer.perform_deliveries = true
 
   # Make template changes take effect immediately.
