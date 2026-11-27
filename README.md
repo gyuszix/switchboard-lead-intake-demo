@@ -18,7 +18,7 @@ The raw JSON is the model's claim. The submission JSON is the broker-approved re
 
 Requirements: Ruby 4.0, Rails 8, and [Ollama](https://ollama.com) with `granite4.2:8b` pulled.
 
-On a new Mac, `./install.sh` sets all of that up: Homebrew (if missing), Ruby 4.0, Ollama running as a background service, the Granite model, the gems and the database. It skips anything already installed, and adds Homebrew and its Ruby to `~/.zprofile` so new terminals find them.
+On a new Mac, `./install.sh` sets all of that up: Ruby 4.0, Ollama running in the background, the Granite model, the gems and the database. It skips anything already installed. Homebrew is optional: if it's installed, Ruby and Ollama come from it (and it's added to `~/.zprofile`); if not, the script offers to install it. Without Homebrew, Ruby is installed with mise or rbenv if you have one (otherwise the script says what to install), and Ollama comes from [ollama.com/download](https://ollama.com/download). Ollama itself is optional too: without it the samples use built-in fixtures.
 
 ```sh
 ./install.sh            # one-time setup on a new Mac
