@@ -1,34 +1,33 @@
-<%# locals: (sent:, received:) %>
+<%# locals: (quote_request:) %>
+<% sent = quote_request.request_data %>
+<% received = quote_request.response_data %>
 <%# HTML snippets are always output escaped: never raw or html_safe. %>
-<details class="exchange">
-  <summary>Steps / scraped</summary>
-  <div class="exchange-label">Steps</div>
-  <pre><%= Array(sent["steps"]).join("\n") %></pre>
+<div class="exchange-label">Steps</div>
+<pre><%= Array(sent["steps"]).join("\n") %></pre>
 
-  <% if sent["filled"].present? %>
-    <div class="exchange-label">Filled fields</div>
-    <table class="exchange-table">
-      <tr><th>Beacon label</th><th>Field</th><th>Value sent</th><th>From</th></tr>
-      <% sent["filled"].each do |f| %>
-        <tr><td><%= f["label"] %></td><td><code><%= f["name"] %></code></td><td><%= f["value"] %></td><td><code><%= f["source"] %></code></td></tr>
-      <% end %>
-    </table>
-  <% end %>
-
-  <% coverages = sent["coverages"] || {} %>
-  <% if coverages.values.any?(&:present?) %>
-    <div class="exchange-label">Coverages</div>
-    <ul class="exchange-list">
-      <% Array(coverages["ticked"]).each do |c| %><li>Ticked: <%= c["label"] %> (<%= c["name"] %>)</li><% end %>
-      <% Array(coverages["unmatched"]).each do |name| %><li>Unmatched: <%= name %> (no checkbox)</li><% end %>
-    </ul>
-  <% end %>
-
-  <% if received && received["scraped"].present? %>
-    <div class="exchange-label">Scraped</div>
-    <% received["scraped"].each do |s| %>
-      <div class="scraped-value"><strong><%= s["label"] %>:</strong> <%= s["value"] %></div>
-      <pre><%= s["html"] %></pre>
+<% if sent["filled"].present? %>
+  <div class="exchange-label">Filled fields</div>
+  <table class="exchange-table">
+    <tr><th>Beacon label</th><th>Field</th><th>Value sent</th><th>From</th></tr>
+    <% sent["filled"].each do |f| %>
+      <tr><td><%= f["label"] %></td><td><code><%= f["name"] %></code></td><td><%= f["value"] %></td><td><code><%= f["source"] %></code></td></tr>
     <% end %>
+  </table>
+<% end %>
+
+<% coverages = sent["coverages"] || {} %>
+<% if coverages.values.any?(&:present?) %>
+  <div class="exchange-label">Coverages</div>
+  <ul class="exchange-list">
+    <% Array(coverages["ticked"]).each do |c| %><li>Ticked: <%= c["label"] %> (<%= c["name"] %>)</li><% end %>
+    <% Array(coverages["unmatched"]).each do |name| %><li>Unmatched: <%= name %> (no checkbox)</li><% end %>
+  </ul>
+<% end %>
+
+<% if received && received["scraped"].present? %>
+  <div class="exchange-label">Scraped</div>
+  <% received["scraped"].each do |s| %>
+    <div class="scraped-value"><strong><%= s["label"] %>:</strong> <%= s["value"] %></div>
+    <pre><%= s["html"] %></pre>
   <% end %>
-</details>
+<% end %>

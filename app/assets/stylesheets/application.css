@@ -184,7 +184,11 @@ textarea { min-height: 360px; font-family: ui-monospace, Menlo, monospace; font-
 .badge.status-sent { background: var(--blue-bg); color: var(--blue); }
 .badge.status-declined, .badge.status-failed { background: #ffebe9; color: var(--red); }
 .badge.status-referred { background: var(--amber-bg); color: var(--amber); }
-.exchange summary { cursor: pointer; color: var(--primary); margin-top: 4px; }
+.exchange-toggle { display: block; margin-top: 4px; padding: 0; border: 0; background: none; font: inherit; color: var(--primary); cursor: pointer; }
+.exchange-toggle::before { content: "▸ "; }
+.exchange-toggle[aria-expanded="true"]::before { content: "▾ "; }
+.quote-requests tr:has(+ .exchange-row:not([hidden])) td { border-bottom: 0; }
+.exchange-row > td { padding-top: 0; }
 .exchange-label { font-weight: 600; margin-top: 8px; color: var(--muted); }
 .exchange pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px; margin: 4px 0; font-size: 0.8rem; max-width: 520px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .exchange-table { border-collapse: collapse; font-size: 0.8rem; margin: 4px 0; }

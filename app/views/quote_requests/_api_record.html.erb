@@ -1,0 +1,5 @@
+<%# locals: (quote_request:) %>
+<div class="exchange-label">Sent</div>
+<pre><%= quote_request.request_body %></pre>
+<div class="exchange-label">Received</div>
+<pre><%= quote_request.response_body.presence || "Nothing received" %></pre>

@@ -1,4 +1,11 @@
 <%# locals: (quote_request:) %>
+<% sent = quote_request.request_data %>
+<% toggle, record =
+     if quote_request.channel == "api" && quote_request.request_body.present? then ["Sent / received", "api_record"]
+     elsif quote_request.channel == "portal" && sent then ["Steps / scraped", "portal_record"]
+     elsif quote_request.channel == "email" && sent then ["Sent", "email_record"]
+     end %>
+<% details_id = dom_id(quote_request, :details) %>
 <tr id="<%= dom_id(quote_request) %>">
   <td><%= quote_request.carrier %></td>
   <td><%= QuoteRequest::CHANNEL_LABELS[quote_request.channel] %></td>
@@ -7,19 +14,23 @@
   <td><%= quote_request.reference %></td>
   <td>
     <%= quote_request.message %>
-    <% if quote_request.channel == "api" && quote_request.request_body.present? %>
-      <details class="exchange">
-        <summary>Sent / received</summary>
-        <div class="exchange-label">Sent</div>
-        <pre><%= quote_request.request_body %></pre>
-        <div class="exchange-label">Received</div>
-        <pre><%= quote_request.response_body.presence || "Nothing received" %></pre>
-      </details>
-    <% elsif quote_request.channel == "portal" && (sent = quote_request.request_data) %>
-      <%= render "quote_requests/portal_record", sent: sent, received: quote_request.response_data %>
-    <% elsif quote_request.channel == "email" && (sent = quote_request.request_data) %>
-      <%= render "quote_requests/email_record", quote_request: quote_request, sent: sent %>
+    <% if record %>
+      <button type="button" class="exchange-toggle" aria-expanded="false" aria-controls="<%= details_id %>"
+              data-controller="row-toggle" data-row-toggle-row-value="<%= details_id %>" data-action="row-toggle#toggle"><%= toggle %></button>
     <% end %>
   </td>
-  <td class="counter"><%= quote_request.created_at&.strftime("%H:%M:%S") %></td>
+  <td class="counter">
+    <% if quote_request.created_at %>
+      <time datetime="<%= quote_request.created_at.iso8601 %>" title="<%= quote_request.created_at.iso8601 %>"><%= quote_request.created_at.strftime("%b %-d, %-l:%M %p") %></time>
+    <% end %>
+  </td>
 </tr>
+<% if record %>
+  <tr id="<%= details_id %>" class="exchange-row" hidden>
+    <td colspan="7">
+      <div class="exchange">
+        <%= render "quote_requests/#{record}", quote_request: quote_request %>
+      </div>
+    </td>
+  </tr>
+<% end %>

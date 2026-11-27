@@ -1,20 +1,18 @@
-<%# locals: (quote_request:, sent:) %>
-<%# Email has no automatic reply, so there is only a Sent section. %>
-<details class="exchange">
-  <summary>Sent</summary>
-  <dl class="email-headers">
-    <dt>From</dt><dd><%= sent["from"] %></dd>
-    <dt>To</dt><dd><%= sent["to"] %></dd>
-    <dt>Subject</dt><dd><%= sent["subject"] %></dd>
-    <dt>Date</dt><dd><%= sent["date"] %></dd>
-  </dl>
-  <div class="exchange-label">Attachments</div>
-  <% if quote_request.document.present? %>
-    <div><%= link_to sent["attachment"], document_submission_quote_request_path(quote_request.submission, quote_request),
-               target: "_blank", rel: "noopener", data: { turbo: false } %></div>
-  <% else %>
-    <div><%= sent["attachment"] %></div>
-  <% end %>
-  <div class="exchange-label">Body</div>
-  <pre><%= sent["body"] %></pre>
-</details>
+<%# locals: (quote_request:) %>
+<% sent = quote_request.request_data %>
+<%# Email has no automatic reply, so there is only what was sent. %>
+<dl class="email-headers">
+  <dt>From</dt><dd><%= sent["from"] %></dd>
+  <dt>To</dt><dd><%= sent["to"] %></dd>
+  <dt>Subject</dt><dd><%= sent["subject"] %></dd>
+  <dt>Date</dt><dd><%= sent["date"] %></dd>
+</dl>
+<div class="exchange-label">Attachments</div>
+<% if quote_request.document.present? %>
+  <div><%= link_to sent["attachment"], document_submission_quote_request_path(quote_request.submission, quote_request),
+             target: "_blank", rel: "noopener", data: { turbo: false } %></div>
+<% else %>
+  <div><%= sent["attachment"] %></div>
+<% end %>
+<div class="exchange-label">Body</div>
+<pre><%= sent["body"] %></pre>
