@@ -1,0 +1,31 @@
+<!-- BEGIN app/views/layouts/mock_carriers/beacon.html.erb
+--><!DOCTYPE html>
+<html>
+  <head>
+    <title>Beacon Mutual Broker Portal</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="YXFht66TRaob9Lm8Ep9tKekSal5nQ4WQr4Z1BzLU3yxXC1x9mhTeZdFKI1j9sOkZYsVhsI7OXhOYcBAL-q6pVw" />
+    <style>
+      body { font-family: Georgia, serif; background: #f2f4f8; color: #1b2a41; margin: 0; }
+      header { background: #1b2a41; color: #fff; padding: 14px 24px; font-size: 1.2rem; }
+      main { max-width: 640px; margin: 24px auto; background: #fff; padding: 24px; border: 1px solid #c8d0dc; }
+      label { display: block; margin-top: 12px; font-weight: bold; font-size: 0.9rem; }
+      input[type=text], input[type=password] { width: 100%; padding: 6px; box-sizing: border-box; }
+      fieldset { margin-top: 16px; } fieldset label { display: inline; font-weight: normal; margin-right: 12px; }
+      .field-error { color: #b00020; font-size: 0.85rem; }
+      .alert-error { background: #b00020; color: #fff; padding: 12px; margin-bottom: 16px; }
+      table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #c8d0dc; padding: 8px; text-align: left; }
+      button { margin-top: 16px; padding: 8px 16px; }
+    </style>
+  </head>
+  <body>
+    <header>Beacon Mutual &middot; Broker Portal <small id="signed-in-as">(signed in as broker)</small></header>
+    <main><!-- BEGIN app/views/mock_carriers/beacon/result.html.erb
+--><h1>Application Result</h1>
+  <div class="alert-error">Declined: flood not offered</div>
+<p><a href="/mock_carriers/beacon/applications/new">Start another application</a></p>
+<!-- END app/views/mock_carriers/beacon/result.html.erb --></main>
+  </body>
+</html>
+<!-- END app/views/layouts/mock_carriers/beacon.html.erb -->
