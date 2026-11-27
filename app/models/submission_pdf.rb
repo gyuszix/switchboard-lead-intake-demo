@@ -1,7 +1,8 @@
 require "prawn"
 
-# A clean, standardised commercial insurance application. Fixed sections in a
-# fixed order, every field always present. No trace of the review process.
+# A clean, standardised commercial insurance application, built from the
+# validated submission JSON. Fixed sections in a fixed order, every field
+# always present. No trace of the review process.
 class SubmissionPdf
   SECTIONS = {
     "Applicant" => %w[business_name fein address zip years_in_business],
@@ -14,14 +15,14 @@ class SubmissionPdf
   LABEL_WIDTH = 170
 
   def initialize(submission, generated_on: Date.current)
-    @submission = submission
+    @json = submission.submission_json || {}
     @generated_on = generated_on
   end
 
   # [[section title, [[label, display value], ...]], ...]
   def sections
     SECTIONS.map do |title, names|
-      [title, names.map { [ApplicationHelper::FIELD_LABELS.fetch(_1), display(_1, @submission.field(_1)["value"])] }]
+      [title, names.map { [ApplicationHelper::FIELD_LABELS.fetch(_1), display(_1, @json.dig(title.downcase, _1))] }]
     end
   end
 
@@ -31,7 +32,7 @@ class SubmissionPdf
 
     pdf.text "Commercial Insurance Application", size: 20, style: :bold
     pdf.move_down 4
-    pdf.text "Submission ##{@submission.id}    Generated #{@generated_on.iso8601}", size: 9, color: "555555"
+    pdf.text "Submission ##{@json["submission_id"]}    Generated #{@generated_on.iso8601}", size: 9, color: "555555"
     pdf.move_down 18
 
     sections.each do |title, rows|
@@ -50,6 +51,7 @@ class SubmissionPdf
 
   def display(name, value)
     return NOT_PROVIDED if value.blank?
+    value = value.join(", ") if value.is_a?(Array)
 
     text = case name
     when "annual_revenue"

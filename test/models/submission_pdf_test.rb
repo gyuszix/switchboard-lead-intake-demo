@@ -2,10 +2,9 @@ require "test_helper"
 
 class SubmissionPdfTest < ActiveSupport::TestCase
   setup do
-    @s = create_sample_submission
-    @s.confirm_all_verified!
-    @s.edit!(:annual_revenue, "4200000")
-    @s.mark_not_provided!(:employee_count)
+    @s = create_ready_submission
+    # A null in the JSON still prints, as "Not provided".
+    @s.update_columns(submission_json: @s.submission_json.deep_merge("operations" => { "employee_count" => nil }))
     @pdf = SubmissionPdf.new(@s, generated_on: Date.new(2026, 11, 26))
   end
 
@@ -17,8 +16,9 @@ class SubmissionPdfTest < ActiveSupport::TestCase
                   "Contact name", "Contact email"], labels
   end
 
-  test "formats revenue, dates and empty fields" do
+  test "formats revenue, dates, coverages and empty fields from the submission JSON" do
     values = @pdf.sections.flat_map(&:last).to_h
+    assert_equal "cyber liability, professional liability, general liability", values["Coverage types"]
     assert_equal "$4,200,000", values["Annual revenue"]
     assert_equal "2027-02-15", values["Effective date"]
     assert_equal "Not provided", values["Employee count"]
