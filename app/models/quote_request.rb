@@ -14,4 +14,18 @@ class QuoteRequest < ApplicationRecord
   validates :channel, inclusion: { in: CARRIERS.keys }
   validates :status, inclusion: { in: STATUSES }
   validates :carrier, presence: true
+
+  # The portal and email channels store their record as JSON in the same
+  # columns the API channel uses for its raw exchange.
+  def request_data = parse_record(request_body)
+  def response_data = parse_record(response_body)
+
+  private
+
+  def parse_record(text)
+    data = JSON.parse(text.to_s)
+    data.is_a?(Hash) ? data : nil
+  rescue JSON::ParserError
+    nil
+  end
 end

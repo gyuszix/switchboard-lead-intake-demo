@@ -7,7 +7,7 @@
   <td><%= quote_request.reference %></td>
   <td>
     <%= quote_request.message %>
-    <% if quote_request.request_body.present? %>
+    <% if quote_request.channel == "api" && quote_request.request_body.present? %>
       <details class="exchange">
         <summary>Sent / received</summary>
         <div class="exchange-label">Sent</div>
@@ -15,6 +15,8 @@
         <div class="exchange-label">Received</div>
         <pre><%= quote_request.response_body.presence || "Nothing received" %></pre>
       </details>
+    <% elsif quote_request.channel == "portal" && (sent = quote_request.request_data) %>
+      <%= render "quote_requests/portal_record", sent: sent, received: quote_request.response_data %>
     <% end %>
     <% if quote_request.document.present? %>
       <div><%= link_to "View sent PDF", document_submission_quote_request_path(quote_request.submission, quote_request),

@@ -63,6 +63,36 @@ class QuoteRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_select "details.exchange pre", /HTTP 201/
   end
 
+  test "portal rows show steps, filled fields and scraped values, with HTML escaped" do
+    make_ready
+    @s.quote_requests.create!(channel: "portal", carrier: "Beacon Mutual", status: "quoted",
+      request_body: { steps: ["GET /mock_carriers/beacon/login → 200", "Filled 1 fields"],
+                      filled: [{ label: "Tax ID No.", name: "tax_id_no", value: "82-6150347", source: "applicant.fein" }],
+                      coverages: { ticked: [{ name: "general liability", label: "General Liability" }], unmatched: ["cyber"] } }.to_json,
+      response_body: { scraped: [{ label: "Reference", value: "BCN-1", html: "<tr><th>Reference</th><td>BCN-1</td></tr><script>alert(1)</script>" }] }.to_json)
+    get ready_submission_path(@s)
+    assert_select "details.exchange summary", "Steps / scraped"
+    assert_select "details.exchange pre", /GET \/mock_carriers\/beacon\/login → 200\nFilled 1 fields/
+    assert_select "details.exchange table.exchange-table td", "Tax ID No."
+    assert_select "details.exchange table.exchange-table td code", "applicant.fein"
+    assert_select "details.exchange li", "Ticked: General Liability (general liability)"
+    assert_select "details.exchange li", "Unmatched: cyber (no checkbox)"
+    assert_select "details.exchange .scraped-value", "Reference: BCN-1"
+    # The snippet is shown as text, never rendered as HTML.
+    assert_select "details.exchange pre", "<tr><th>Reference</th><td>BCN-1</td></tr><script>alert(1)</script>"
+    assert_includes response.body, "&lt;script&gt;alert(1)&lt;/script&gt;"
+    assert_select "details.exchange script", count: 0
+  end
+
+  test "portal rows that stopped early have no scraped section" do
+    make_ready
+    @s.quote_requests.create!(channel: "portal", carrier: "Beacon Mutual", status: "failed",
+      request_body: { steps: ["Stopped: Coverage 'cyber' not available on Beacon portal"], filled: [], coverages: {} }.to_json)
+    get ready_submission_path(@s)
+    assert_select "details.exchange pre", /Stopped: Coverage/
+    assert_select "details.exchange .exchange-label", text: "Scraped", count: 0
+  end
+
   test "rows without a document have no PDF link and 404" do
     make_ready
     qr = @s.quote_requests.create!(channel: "api", carrier: "Acme Insurance", status: "quoted")
