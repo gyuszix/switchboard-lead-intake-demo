@@ -199,33 +199,52 @@ textarea { min-height: 360px; font-family: ui-monospace, Menlo, monospace; font-
 .email-headers dt { font-weight: 600; color: var(--muted); }
 .email-headers dd { margin: 0; }
 
-/* Pipeline bar, fixed to the bottom of every page. Colour means state only;
-   the actor is shown by icon and label, gates by a shield and double border. */
+/* Pipeline bar, fixed to the bottom of every page. Fill colour means actor
+   (AI purple, Code blue, Human amber, Input grey). State only changes the
+   outline, ring and icons; gates get a double border, shield and GATE tag.
+   Mid-tone fills keep white text readable (5:1+) and stand out on light or
+   dark backgrounds; tints are translucent so they suit either. */
+:root { --actor-ai: #7451b8; --actor-code: #2f6aa8; --actor-human: #94650f; --actor-input: #59636e; }
+.actor-ai { --actor: var(--actor-ai); }
+.actor-code { --actor: var(--actor-code); }
+.actor-human { --actor: var(--actor-human); }
+.actor-input { --actor: var(--actor-input); }
 body { padding-bottom: 128px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.pipeline { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; height: 100px; background: var(--surface); border-top: 1px solid var(--border); box-shadow: 0 -2px 8px rgba(31, 35, 40, 0.06); overflow-x: auto; }
+.pipeline { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; height: 100px; display: flex; align-items: center; justify-content: safe center; gap: 10px; padding: 0 10px; background: var(--surface); border-top: 1px solid var(--border); box-shadow: 0 -2px 8px rgba(31, 35, 40, 0.06); overflow-x: auto; }
 .pipeline ol { list-style: none; margin: 0; padding: 0; }
-.pipeline-steps { display: flex; align-items: center; justify-content: center; min-width: max-content; height: 100%; padding: 0 12px; }
+.pipeline-steps { display: flex; align-items: center; min-width: max-content; height: 100%; }
+.pipeline-legend { display: grid; gap: 2px; flex: none; font-size: 0.66rem; color: var(--muted); }
+.pipeline-legend li { display: flex; align-items: center; gap: 4px; }
+.legend-swatch { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 14px; border-radius: 3px; background: var(--actor); color: #fff; }
+.legend-swatch.legend-gate { background: var(--surface); color: var(--text); border: 3px double var(--text); }
 .pipeline-steps > li { display: flex; align-items: center; }
-.pipeline-steps > li + li::before { content: "→"; color: var(--muted); margin: 0 5px; }
-.pipeline-step { display: flex; flex-direction: column; justify-content: center; gap: 2px; width: 106px; height: 58px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--muted); font-size: 0.72rem; line-height: 1.2; cursor: default; }
-.pipeline-step.gate { border-style: double; border-width: 3px; padding: 2px 6px; }
+.pipeline-steps > li + li::before { content: "→"; color: var(--muted); margin: 0 3px; }
+.pipeline-step { display: flex; flex-direction: column; justify-content: center; gap: 2px; width: 90px; height: 58px; padding: 4px 6px; border: 1px solid var(--actor); border-radius: 6px; background: var(--actor); color: #fff; font-size: 0.72rem; line-height: 1.2; cursor: default; }
+.pipeline-step.gate { width: 100px; border-style: double; border-width: 3px; padding: 2px 4px; }
 .pipeline-label { font-weight: 600; display: flex; align-items: center; gap: 3px; }
 .pipeline-actor { display: flex; align-items: center; gap: 3px; font-size: 0.68rem; }
+.gate-tag { margin-left: auto; padding: 0 2px; border: 1px solid currentColor; border-radius: 3px; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.04em; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 0 1.5px #fff; }
+.status-dot.status-quoted { background: #2da44e; }
+.status-dot.status-declined, .status-dot.status-referred { background: #d4a72c; }
+.status-dot.status-failed { background: var(--red); }
+.status-dot.status-sent { background: #54aeff; }
 .pipeline-icon { flex: none; }
 .pipeline-fork { gap: 0; }
 .pipeline-fork-arrows { color: var(--muted); }
 .pipeline-channels { display: flex; flex-direction: column; gap: 3px; }
-.pipeline-step.channel { flex-direction: row; align-items: center; justify-content: space-between; gap: 6px; width: 214px; height: 25px; padding: 0 8px; white-space: nowrap; }
-.pipeline-step.state-done { background: var(--muted); border-color: var(--text); color: #fff; }
-.pipeline-step.state-active, .pipeline-step.is-running { background: var(--surface); border-color: var(--primary); color: var(--text); box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.25); }
+.pipeline-step.channel { flex-direction: row; align-items: center; justify-content: space-between; gap: 6px; width: 196px; height: 25px; padding: 0 7px; white-space: nowrap; }
+.pipeline-step.state-pending { background: color-mix(in srgb, var(--actor) 14%, transparent); border-style: dashed; color: var(--actor); }
+.pipeline-step.state-pending > * { opacity: 0.7; }
+.pipeline-step.gate.state-pending { border-style: double; }
+.pipeline-step.state-active, .pipeline-step.is-running { background: var(--actor); color: #fff; box-shadow: 0 0 0 2px var(--surface), 0 0 0 5px var(--actor); }
+.pipeline-step.is-running > * { opacity: 1; }
+.pipeline-step.is-running:not(.gate) { border-style: solid; }
 .pipeline-step.is-running { animation: pipeline-pulse 1.4s ease-in-out infinite; }
-.pipeline-step.state-failed { background: #ffebe9; border-color: var(--red); color: var(--red); }
-.pipeline-step.state-quoted { background: var(--green-bg); border-color: var(--green); color: var(--green); }
-.pipeline-step.state-declined, .pipeline-step.state-referred { background: var(--amber-bg); border-color: var(--amber); color: var(--amber); }
-.pipeline-step.state-sent { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+.pipeline-step.state-failed:not(.channel) { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--red); }
 @keyframes pipeline-pulse {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.25); }
-  50% { box-shadow: 0 0 0 6px rgba(31, 111, 235, 0.08); }
+  0%, 100% { box-shadow: 0 0 0 2px var(--surface), 0 0 0 5px var(--actor); }
+  50% { box-shadow: 0 0 0 2px var(--surface), 0 0 0 8px color-mix(in srgb, var(--actor) 30%, transparent); }
 }
 @media (prefers-reduced-motion: reduce) { .pipeline-step.is-running { animation: none; } }
