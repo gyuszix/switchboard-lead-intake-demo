@@ -52,9 +52,24 @@ class ApiChannelTest < ActiveSupport::TestCase
     assert_equal "Acme API unavailable (503)", channel(code: 503, body: { error: "service unavailable" }).call(@s).message
   end
 
+  test "records what was sent and received, without the token" do
+    qr = channel(code: 201, body: { status: "quoted", quote_id: "ACM-42", premium: 22_200, valid_until: "2026-12-26" }).call(@s)
+    assert qr.request_body.start_with?("POST http://carrier.test/mock_carriers/acme/api/v1/quotes\n")
+    assert_includes qr.request_body, "Authorization: Bearer [hidden]"
+    assert_not_includes qr.request_body, "t0k"
+    assert_includes qr.request_body, %("insured_name": "Brightpath IT Solutions Inc")
+    assert qr.response_body.start_with?("HTTP 201\n\n")
+    assert_includes qr.response_body, %("quote_id": "ACM-42")
+
+    qr = channel(code: 401, body: { error: "unauthorized" }).call(@s)
+    assert_includes qr.response_body, "HTTP 401"
+  end
+
   test "timeouts and connection errors are failed, never raised" do
     qr = channel(raises: Net::ReadTimeout).call(@s)
     assert_equal ["failed", "Acme API timed out after 15s"], [qr.status, qr.message]
+    assert qr.request_body.present?
+    assert_nil qr.response_body
     qr = channel(raises: Errno::ECONNREFUSED).call(@s)
     assert_equal ["failed", "Could not connect to Acme API (ECONNREFUSED)"], [qr.status, qr.message]
   end

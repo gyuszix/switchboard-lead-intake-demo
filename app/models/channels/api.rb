@@ -57,15 +57,28 @@ module Channels
       COVERAGE_SYNONYMS.fetch(name.downcase, name)
     end
 
+    HEADERS = { "Content-Type" => "application/json", "Accept" => "application/json" }.freeze
+
+    # Records what was sent and, if anything came back, what was received.
     def deliver(json)
-      response = @transport.call(@url, payload(json).to_json,
-        "Content-Type" => "application/json", "Accept" => "application/json",
-        "Authorization" => "Bearer #{@token}")
-      interpret(response)
+      body = payload(json).to_json
+      sent = ["POST #{@url}", *HEADERS.map { "#{_1}: #{_2}" }, "Authorization: Bearer [hidden]", "", pretty(body)].join("\n")
+      exchange(body).merge(request_body: sent)
+    end
+
+    def exchange(body)
+      response = @transport.call(@url, body, HEADERS.merge("Authorization" => "Bearer #{@token}"))
+      interpret(response).merge(response_body: "HTTP #{response.code}\n\n#{pretty(response.body)}")
     rescue Net::OpenTimeout, Net::ReadTimeout
       failed("Acme API timed out after #{TIMEOUT}s")
     rescue SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError => e
       failed("Could not connect to Acme API (#{e.class.name.demodulize})")
+    end
+
+    def pretty(text)
+      JSON.pretty_generate(JSON.parse(text.to_s))
+    rescue JSON::ParserError
+      text.to_s
     end
 
     def interpret(response)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_27_004647) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_27_004709) do
   create_table "quote_requests", force: :cascade do |t|
     t.integer "submission_id", null: false
     t.string "channel", null: false
@@ -22,6 +22,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_27_004647) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.binary "document"
+    t.text "request_body"
+    t.text "response_body"
     t.index ["submission_id"], name: "index_quote_requests_on_submission_id"
   end
 

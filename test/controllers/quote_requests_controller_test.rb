@@ -53,6 +53,16 @@ class QuoteRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_equal qr.document.b, response.body.b
   end
 
+  test "API rows show what was sent and received" do
+    make_ready
+    @s.quote_requests.create!(channel: "api", carrier: "Acme Insurance", status: "quoted",
+                              request_body: "POST /quotes\n\n{}", response_body: "HTTP 201\n\n{\"premium\": 1}")
+    get ready_submission_path(@s)
+    assert_select "details.exchange summary", "Sent / received"
+    assert_select "details.exchange pre", /POST \/quotes/
+    assert_select "details.exchange pre", /HTTP 201/
+  end
+
   test "rows without a document have no PDF link and 404" do
     make_ready
     qr = @s.quote_requests.create!(channel: "api", carrier: "Acme Insurance", status: "quoted")
@@ -78,5 +88,6 @@ class QuoteRequestsControllerTest < ActionDispatch::IntegrationTest
     assert_select "button", "Email submission to Northwind"
     assert_select "#quote_requests tr", 1
     assert_select "#quote_requests td", "$18,450"
+    assert_select "details.exchange", 0
   end
 end
