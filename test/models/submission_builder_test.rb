@@ -34,7 +34,7 @@ class SubmissionBuilderTest < ActiveSupport::TestCase
 
   test "splits coverage types on commas and 'and'" do
     set(:coverage_types, "General liability, commercial property And workers comp, ,")
-    assert_equal ["General liability", "commercial property", "workers comp"], build["coverage"]["coverage_types"]
+    assert_equal [ "General liability", "commercial property", "workers comp" ], build["coverage"]["coverage_types"]
   end
 
   test "keeps effective date as YYYY-MM-DD" do

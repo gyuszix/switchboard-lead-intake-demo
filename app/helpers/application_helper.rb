@@ -40,7 +40,7 @@ module ApplicationHelper
   # One transcript line with its speaker label ("Broker:", "Name:") in bold.
   def transcript_line(text)
     if (m = text.match(SPEAKER_LABEL))
-      safe_join([tag.strong(m[1]), m[2]])
+      safe_join([ tag.strong(m[1]), m[2] ])
     else
       text
     end

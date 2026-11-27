@@ -8,7 +8,7 @@ class EmailChannelTest < ActiveSupport::TestCase
 
   test "mailer sends to Northwind with the PDF attached and a plain-text summary" do
     mail = CarrierSubmissionMailer.with(submission: @s).submission
-    assert_equal ["submissions@northwind.test"], mail.to
+    assert_equal [ "submissions@northwind.test" ], mail.to
     assert_equal 1, mail.attachments.size
     assert_equal "application/pdf", mail.attachments.first.mime_type
     assert mail.attachments.first.body.decoded.start_with?("%PDF")
@@ -23,8 +23,8 @@ class EmailChannelTest < ActiveSupport::TestCase
     qr = Channels::Email.new.call(@s)
     assert_equal 1, ActionMailer::Base.deliveries.size
     assert qr.persisted?
-    assert_equal ["sent", "Awaiting carrier reply", "Northwind Specialty", "email"],
-                 [qr.status, qr.message, qr.carrier, qr.channel]
+    assert_equal [ "sent", "Awaiting carrier reply", "Northwind Specialty", "email" ],
+                 [ qr.status, qr.message, qr.carrier, qr.channel ]
   end
 
   test "channel records the email as it was sent" do

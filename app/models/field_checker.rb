@@ -53,7 +53,7 @@ class FieldChecker
   end
 
   def check_against_transcript(name, value, quote, mentions)
-    return ["Not stated in call"] if value.blank?
+    return [ "Not stated in call" ] if value.blank?
 
     reasons = []
     if quote.blank?
@@ -174,7 +174,7 @@ class FieldChecker
   def conflicts?(name, value, mention)
     case name
     when *NUMERIC
-      (number_runs(mention) - [digits(value)]).any?
+      (number_runs(mention) - [ digits(value) ]).any?
     when "contact_email"
       mention.scan(EMAIL_PATTERN).any? { _1.downcase != value.downcase }
     when "effective_date"
@@ -211,11 +211,11 @@ class FieldChecker
   # [month, day, year_or_nil] for each literal date found in text.
   def dates_in(text)
     t = text.to_s.downcase
-    found = t.scan(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/).map { |y, m, d| [m.to_i, d.to_i, y.to_i] }
-    found += t.scan(%r{\b(\d{1,2})/(\d{1,2})(?:/(\d{4}))?\b}).map { |m, d, y| [m.to_i, d.to_i, y&.to_i] }
+    found = t.scan(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/).map { |y, m, d| [ m.to_i, d.to_i, y.to_i ] }
+    found += t.scan(%r{\b(\d{1,2})/(\d{1,2})(?:/(\d{4}))?\b}).map { |m, d, y| [ m.to_i, d.to_i, y&.to_i ] }
     month_re = MONTHS.join("|")
     found += t.scan(/\b(#{month_re})\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?/).map do |m, d, y|
-      [MONTHS.index(m) + 1, d.to_i, y&.to_i]
+      [ MONTHS.index(m) + 1, d.to_i, y&.to_i ]
     end
     found
   end

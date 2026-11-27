@@ -18,16 +18,16 @@ class PortalChannelTest < ActiveSupport::TestCase
   # Logging in sets a session cookie and redirects, like the mock carrier.
   def with_beacon(result)
     pages = { "app_form" => file_fixture("beacon/app_form.html").read, "result" => file_fixture("beacon/#{result}.html").read }
-    html = ->(body) { [200, { "content-type" => "text/html" }, [body]] }
+    html = ->(body) { [ 200, { "content-type" => "text/html" }, [ body ] ] }
     app = lambda do |env|
       req = Rack::Request.new(env)
-      case [req.request_method, req.path]
-      in ["GET", "/mock_carriers/beacon/login"] then html.(LOGIN_PAGE)
-      in ["POST", "/mock_carriers/beacon/login"] if req.POST["password"] == "beacon-demo"
-        [302, { "location" => "/mock_carriers/beacon/applications/new", "set-cookie" => "_beacon_session=cookie-secret-123; path=/" }, []]
-      in ["GET", "/mock_carriers/beacon/applications/new"] then html.(pages["app_form"])
-      in ["POST", "/mock_carriers/beacon/applications"] then html.(pages["result"])
-      else [404, {}, []]
+      case [ req.request_method, req.path ]
+      in [ "GET", "/mock_carriers/beacon/login" ] then html.(LOGIN_PAGE)
+      in [ "POST", "/mock_carriers/beacon/login" ] if req.POST["password"] == "beacon-demo"
+        [ 302, { "location" => "/mock_carriers/beacon/applications/new", "set-cookie" => "_beacon_session=cookie-secret-123; path=/" }, [] ]
+      in [ "GET", "/mock_carriers/beacon/applications/new" ] then html.(pages["app_form"])
+      in [ "POST", "/mock_carriers/beacon/applications" ] then html.(pages["result"])
+      else [ 404, {}, [] ]
       end
     end
     server = Puma::Server.new(app, nil, min_threads: 0, max_threads: 2, log_writer: Puma::LogWriter.null)
@@ -41,7 +41,7 @@ class PortalChannelTest < ActiveSupport::TestCase
   # The Hudson sample with cyber added, which Beacon doesn't offer.
   def cyber_ready_submission
     s = create_ready_submission
-    s.update_columns(submission_json: s.submission_json.deep_merge("coverage" => { "coverage_types" => ["general liability", "cyber liability"] }))
+    s.update_columns(submission_json: s.submission_json.deep_merge("coverage" => { "coverage_types" => [ "general liability", "cyber liability" ] }))
     s
   end
 
@@ -58,13 +58,13 @@ class PortalChannelTest < ActiveSupport::TestCase
   test "ticks coverage checkboxes by label text, translating synonyms" do
     p = page("app_form")
     form = p.form_with(id: "new_application")
-    portal.tick_coverages(p, form, ["General liability", "workers compensation"])
+    portal.tick_coverages(p, form, [ "General liability", "workers compensation" ])
     assert_equal %w[general_liability workers_comp], form.checkboxes.select(&:checked?).map(&:value)
   end
 
   test "stops on a coverage with no checkbox" do
     p = page("app_form")
-    error = assert_raises(Channels::Portal::Failure) { portal.tick_coverages(p, p.form_with(id: "new_application"), ["cyber liability"]) }
+    error = assert_raises(Channels::Portal::Failure) { portal.tick_coverages(p, p.form_with(id: "new_application"), [ "cyber liability" ]) }
     assert_equal "Coverage 'cyber liability' not available on Beacon portal", error.message
   end
 
@@ -83,7 +83,7 @@ class PortalChannelTest < ActiveSupport::TestCase
     qr = Channels::Portal.new(base_url: "http://127.0.0.1:9").call(create_ready_submission)
     assert_equal "failed", qr.status
     assert_match(/Could not connect to Beacon portal/, qr.message)
-    assert_equal ["GET /mock_carriers/beacon/login → no response", "Stopped: #{qr.message}"], qr.request_data["steps"]
+    assert_equal [ "GET /mock_carriers/beacon/login → no response", "Stopped: #{qr.message}" ], qr.request_data["steps"]
     assert_nil qr.response_body
   end
 
@@ -91,23 +91,23 @@ class PortalChannelTest < ActiveSupport::TestCase
     qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(create_ready_submission) }
     assert_equal "quoted", qr.status
     sent = qr.request_data
-    assert_equal ["GET /mock_carriers/beacon/login → 200", "POST /mock_carriers/beacon/login → 302",
+    assert_equal [ "GET /mock_carriers/beacon/login → 200", "POST /mock_carriers/beacon/login → 302",
                   "GET /mock_carriers/beacon/applications/new → 200", "Logged in as broker",
-                  "Filled 8 fields", "Ticked 3 coverages", "POST /mock_carriers/beacon/applications → 200"], sent["steps"]
+                  "Filled 8 fields", "Ticked 3 coverages", "POST /mock_carriers/beacon/applications → 200" ], sent["steps"]
     assert_equal 8, sent["filled"].size
     assert_includes sent["filled"], { "label" => "Tax ID No.", "name" => "tax_id_no", "value" => "81-4420976", "source" => "applicant.fein" }
     assert_includes sent["filled"], { "label" => "Gross Annual Sales", "name" => "gross_annual_sales", "value" => "5,400,000",
                                       "source" => "operations.annual_revenue" }
-    assert_equal [{ "name" => "general liability", "label" => "General Liability" },
+    assert_equal [ { "name" => "general liability", "label" => "General Liability" },
                   { "name" => "property", "label" => "Property" },
-                  { "name" => "workers comp", "label" => "Workers Comp" }], sent["coverages"]["ticked"]
+                  { "name" => "workers comp", "label" => "Workers Comp" } ], sent["coverages"]["ticked"]
     assert_empty sent["coverages"]["unmatched"]
   end
 
   test "every scraped value comes with the HTML it was read from" do
     qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(create_ready_submission) }
     scraped = qr.response_data["scraped"]
-    assert_equal [["Status", "quoted"], ["Reference", "BCN-722916"], ["Premium", 3825]], scraped.map { [_1["label"], _1["value"]] }
+    assert_equal [ [ "Status", "quoted" ], [ "Reference", "BCN-722916" ], [ "Premium", 3825 ] ], scraped.map { [ _1["label"], _1["value"] ] }
     assert_equal "<tr>\n<th>Premium</th>\n<td>$3,825.00</td>\n</tr>", scraped.last["html"]
     scraped.each { assert _1["html"].start_with?("<tr>") }
 
@@ -118,7 +118,7 @@ class PortalChannelTest < ActiveSupport::TestCase
 
     p = portal
     p.parse_result(page("errors"))
-    assert_equal ["Error on tax_id_no", "Error on gross_annual_sales"], p.record[:scraped].map { _1[:label] }
+    assert_equal [ "Error on tax_id_no", "Error on gross_annual_sales" ], p.record[:scraped].map { _1[:label] }
     assert p.record[:scraped].all? { _1[:html].start_with?('<div class="field-error"') && _1[:html].length <= 300 }
   end
 
@@ -133,10 +133,10 @@ class PortalChannelTest < ActiveSupport::TestCase
     qr = with_beacon("quoted") { Channels::Portal.new(base_url: _1).call(cyber_ready_submission) }
     assert_equal "failed", qr.status
     sent = qr.request_data
-    assert_equal ["Logged in as broker", "Filled 8 fields", "Stopped: Coverage 'cyber liability' not available on Beacon portal"],
+    assert_equal [ "Logged in as broker", "Filled 8 fields", "Stopped: Coverage 'cyber liability' not available on Beacon portal" ],
                  sent["steps"].last(3)
     refute sent["steps"].any? { _1.include?("/applications →") || _1.start_with?("POST /mock_carriers/beacon/applications") }
-    assert_equal ["cyber liability"], sent["coverages"]["unmatched"]
+    assert_equal [ "cyber liability" ], sent["coverages"]["unmatched"]
     assert_nil qr.response_body
   end
 end

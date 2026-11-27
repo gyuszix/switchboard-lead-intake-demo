@@ -62,7 +62,7 @@ module Channels
     # Records what was sent and, if anything came back, what was received.
     def deliver(json)
       body = payload(json).to_json
-      sent = ["POST #{@url}", *HEADERS.map { "#{_1}: #{_2}" }, "Authorization: Bearer [hidden]", "", pretty(body)].join("\n")
+      sent = [ "POST #{@url}", *HEADERS.map { "#{_1}: #{_2}" }, "Authorization: Bearer [hidden]", "", pretty(body) ].join("\n")
       exchange(body).merge(request_body: sent)
     end
 
@@ -83,17 +83,17 @@ module Channels
 
     def interpret(response)
       body = parse(response.body)
-      case [response.code, body["status"]]
-      in [201, "quoted"]
+      case [ response.code, body["status"] ]
+      in [ 201, "quoted" ]
         { status: "quoted", premium: body["premium"], reference: body["quote_id"],
           message: "Valid until #{body["valid_until"]}" }
-      in [200, "declined" | "referred" => status]
+      in [ 200, "declined" | "referred" => status ]
         { status: status, message: body["reason"] }
-      in [401, _]
+      in [ 401, _ ]
         failed("Acme rejected the API token (401)")
-      in [422, _]
+      in [ 422, _ ]
         failed("Acme rejected the request (422): #{Array(body["details"]).join("; ")}")
-      in [503, _]
+      in [ 503, _ ]
         failed("Acme API unavailable (503)")
       else
         failed("Unexpected response from Acme API (HTTP #{response.code})")

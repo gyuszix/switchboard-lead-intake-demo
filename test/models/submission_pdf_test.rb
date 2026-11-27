@@ -11,9 +11,9 @@ class SubmissionPdfTest < ActiveSupport::TestCase
   test "fixed sections in fixed order with every field present" do
     assert_equal %w[Applicant Operations Coverage Contact], @pdf.sections.map(&:first)
     labels = @pdf.sections.flat_map { _2.map(&:first) }
-    assert_equal ["Business name", "FEIN", "Address", "ZIP", "Years in business", "Industry description",
+    assert_equal [ "Business name", "FEIN", "Address", "ZIP", "Years in business", "Industry description",
                   "NAICS code", "Annual revenue", "Employee count", "Coverage types", "Effective date",
-                  "Contact name", "Contact email"], labels
+                  "Contact name", "Contact email" ], labels
   end
 
   test "formats revenue, dates, coverages and empty fields from the submission JSON" do

@@ -6,7 +6,7 @@ class SubmissionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "textarea[name=transcript]"
     assert_select "a.button", 3
-    assert_equal ["Northgate Dental (happy path)", "Hudson Millwork (AI caught)", "Lumen Analytics (channels differ)"],
+    assert_equal [ "Northgate Dental (happy path)", "Hudson Millwork (AI caught)", "Lumen Analytics (channels differ)" ],
                  css_select("a.button").map { _1.text.strip }
   end
 

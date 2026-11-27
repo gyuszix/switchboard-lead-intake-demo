@@ -29,11 +29,11 @@ class PipelineBarTest < ActionDispatch::IntegrationTest
 
   test "each step renders with its actor class" do
     get root_path
-    actors = css_select("#pipeline .pipeline-step").to_h { [_1["data-pipeline-key"], _1["class"].split.grep(/\Aactor-/)] }
-    assert_equal({ "transcript" => ["actor-input"], "extract" => ["actor-ai"], "transcript_check" => ["actor-code"],
-                   "review" => ["actor-human"], "build" => ["actor-code"], "schema" => ["actor-code"],
-                   "channel" => ["actor-human"], "channel_api" => ["actor-code"], "channel_portal" => ["actor-code"],
-                   "channel_email" => ["actor-code"] }, actors)
+    actors = css_select("#pipeline .pipeline-step").to_h { [ _1["data-pipeline-key"], _1["class"].split.grep(/\Aactor-/) ] }
+    assert_equal({ "transcript" => [ "actor-input" ], "extract" => [ "actor-ai" ], "transcript_check" => [ "actor-code" ],
+                   "review" => [ "actor-human" ], "build" => [ "actor-code" ], "schema" => [ "actor-code" ],
+                   "channel" => [ "actor-human" ], "channel_api" => [ "actor-code" ], "channel_portal" => [ "actor-code" ],
+                   "channel_email" => [ "actor-code" ] }, actors)
   end
 
   test "state classes sit alongside actor classes, never replace them" do

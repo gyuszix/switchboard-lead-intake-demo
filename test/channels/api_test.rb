@@ -22,33 +22,33 @@ class ApiChannelTest < ActiveSupport::TestCase
       "insured_name" => "Hudson Millwork LLC", "tax_id" => "81-4420976",
       "street_address" => "77 Paterson Plank Road, Carlstadt, New Jersey", "postal_code" => "07072",
       "naics" => "337110", "annual_revenue" => 5_400_000, "employees" => 41,
-      "coverages" => ["general liability", "property", "workers comp"], "effective_date" => "2027-04-01"
+      "coverages" => [ "general liability", "property", "workers comp" ], "effective_date" => "2027-04-01"
     }, @sent[:json])
   end
 
   test "translates coverage synonyms to Acme's vocabulary" do
-    json = { "coverage" => { "coverage_types" => ["Workers Compensation", "commercial property", "General liability"] } }
-    assert_equal ["workers comp", "property", "General liability"], Channels::Api.new.payload(json)["coverages"]
+    json = { "coverage" => { "coverage_types" => [ "Workers Compensation", "commercial property", "General liability" ] } }
+    assert_equal [ "workers comp", "property", "General liability" ], Channels::Api.new.payload(json)["coverages"]
   end
 
   test "quoted" do
     qr = channel(code: 201, body: { status: "quoted", quote_id: "ACM-42", premium: 22_200, valid_until: "2026-12-26" }).call(@s)
     assert qr.persisted?
-    assert_equal ["quoted", 22_200, "ACM-42", "Valid until 2026-12-26", "Acme Insurance", "api"],
-                 [qr.status, qr.premium, qr.reference, qr.message, qr.carrier, qr.channel]
+    assert_equal [ "quoted", 22_200, "ACM-42", "Valid until 2026-12-26", "Acme Insurance", "api" ],
+                 [ qr.status, qr.premium, qr.reference, qr.message, qr.carrier, qr.channel ]
   end
 
   test "declined and referred" do
     qr = channel(code: 200, body: { status: "declined", reason: "flood not offered" }).call(@s)
-    assert_equal ["declined", "flood not offered"], [qr.status, qr.message]
+    assert_equal [ "declined", "flood not offered" ], [ qr.status, qr.message ]
     qr = channel(code: 200, body: { status: "referred", reason: "Requires underwriter review" }).call(@s)
-    assert_equal ["referred", "Requires underwriter review"], [qr.status, qr.message]
+    assert_equal [ "referred", "Requires underwriter review" ], [ qr.status, qr.message ]
   end
 
   test "401, 422 and 503 are failed with a clear message" do
     assert_equal "Acme rejected the API token (401)", channel(code: 401, body: { error: "unauthorized" }).call(@s).message
-    qr = channel(code: 422, body: { error: "invalid", details: ["tax_id is required"] }).call(@s)
-    assert_equal ["failed", "Acme rejected the request (422): tax_id is required"], [qr.status, qr.message]
+    qr = channel(code: 422, body: { error: "invalid", details: [ "tax_id is required" ] }).call(@s)
+    assert_equal [ "failed", "Acme rejected the request (422): tax_id is required" ], [ qr.status, qr.message ]
     assert_equal "Acme API unavailable (503)", channel(code: 503, body: { error: "service unavailable" }).call(@s).message
   end
 
@@ -67,17 +67,17 @@ class ApiChannelTest < ActiveSupport::TestCase
 
   test "timeouts and connection errors are failed, never raised" do
     qr = channel(raises: Net::ReadTimeout).call(@s)
-    assert_equal ["failed", "Acme API timed out after 15s"], [qr.status, qr.message]
+    assert_equal [ "failed", "Acme API timed out after 15s" ], [ qr.status, qr.message ]
     assert qr.request_body.present?
     assert_nil qr.response_body
     qr = channel(raises: Errno::ECONNREFUSED).call(@s)
-    assert_equal ["failed", "Could not connect to Acme API (ECONNREFUSED)"], [qr.status, qr.message]
+    assert_equal [ "failed", "Could not connect to Acme API (ECONNREFUSED)" ], [ qr.status, qr.message ]
   end
 
   test "garbage response is failed" do
     transport = ->(*) { Channels::Api::Response.new(200, "<html>oops</html>") }
     qr = Channels::Api.new(transport: transport).call(@s)
-    assert_equal ["failed", "Unexpected response from Acme API (HTTP 200)"], [qr.status, qr.message]
+    assert_equal [ "failed", "Unexpected response from Acme API (HTTP 200)" ], [ qr.status, qr.message ]
   end
 
   test "refused, and nothing sent, when the submission is not ready" do

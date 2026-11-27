@@ -22,7 +22,7 @@ class SubmissionPdf
   # [[section title, [[label, display value], ...]], ...]
   def sections
     SECTIONS.map do |title, names|
-      [title, names.map { [ApplicationHelper::FIELD_LABELS.fetch(_1), display(_1, @json.dig(title.downcase, _1))] }]
+      [ title, names.map { [ ApplicationHelper::FIELD_LABELS.fetch(_1), display(_1, @json.dig(title.downcase, _1)) ] } ]
     end
   end
 
@@ -71,12 +71,12 @@ class SubmissionPdf
 
   def row(pdf, label, value)
     top = pdf.cursor
-    pdf.bounding_box([0, top], width: LABEL_WIDTH) { pdf.text label, size: 10, style: :bold }
+    pdf.bounding_box([ 0, top ], width: LABEL_WIDTH) { pdf.text label, size: 10, style: :bold }
     label_bottom = pdf.cursor
     pdf.move_cursor_to top
-    pdf.bounding_box([LABEL_WIDTH, top], width: pdf.bounds.width - LABEL_WIDTH) do
+    pdf.bounding_box([ LABEL_WIDTH, top ], width: pdf.bounds.width - LABEL_WIDTH) do
       pdf.text value, size: 10, color: value == NOT_PROVIDED ? "777777" : "000000"
     end
-    pdf.move_cursor_to [label_bottom, pdf.cursor].min - 6
+    pdf.move_cursor_to [ label_bottom, pdf.cursor ].min - 6
   end
 end

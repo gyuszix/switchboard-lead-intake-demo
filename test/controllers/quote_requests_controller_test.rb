@@ -75,10 +75,10 @@ class QuoteRequestsControllerTest < ActionDispatch::IntegrationTest
   test "portal rows show steps, filled fields and scraped values, with HTML escaped" do
     make_ready
     @s.quote_requests.create!(channel: "portal", carrier: "Beacon Mutual", status: "quoted",
-      request_body: { steps: ["GET /mock_carriers/beacon/login → 200", "Filled 1 fields"],
-                      filled: [{ label: "Tax ID No.", name: "tax_id_no", value: "82-6150347", source: "applicant.fein" }],
-                      coverages: { ticked: [{ name: "general liability", label: "General Liability" }], unmatched: ["cyber"] } }.to_json,
-      response_body: { scraped: [{ label: "Reference", value: "BCN-1", html: "<tr><th>Reference</th><td>BCN-1</td></tr><script>alert(1)</script>" }] }.to_json)
+      request_body: { steps: [ "GET /mock_carriers/beacon/login → 200", "Filled 1 fields" ],
+                      filled: [ { label: "Tax ID No.", name: "tax_id_no", value: "82-6150347", source: "applicant.fein" } ],
+                      coverages: { ticked: [ { name: "general liability", label: "General Liability" } ], unmatched: [ "cyber" ] } }.to_json,
+      response_body: { scraped: [ { label: "Reference", value: "BCN-1", html: "<tr><th>Reference</th><td>BCN-1</td></tr><script>alert(1)</script>" } ] }.to_json)
     get ready_submission_path(@s)
     assert_select "button.exchange-toggle", "Steps / scraped"
     assert_select "tr.exchange-row .exchange pre", /GET \/mock_carriers\/beacon\/login → 200\nFilled 1 fields/
@@ -96,7 +96,7 @@ class QuoteRequestsControllerTest < ActionDispatch::IntegrationTest
   test "portal rows that stopped early have no scraped section" do
     make_ready
     @s.quote_requests.create!(channel: "portal", carrier: "Beacon Mutual", status: "failed",
-      request_body: { steps: ["Stopped: Coverage 'cyber' not available on Beacon portal"], filled: [], coverages: {} }.to_json)
+      request_body: { steps: [ "Stopped: Coverage 'cyber' not available on Beacon portal" ], filled: [], coverages: {} }.to_json)
     get ready_submission_path(@s)
     assert_select "tr.exchange-row .exchange pre", /Stopped: Coverage/
     assert_select "tr.exchange-row .exchange .exchange-label", text: "Scraped", count: 0

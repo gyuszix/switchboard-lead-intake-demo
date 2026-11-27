@@ -30,7 +30,7 @@ class SubmissionTest < ActiveSupport::TestCase
   test "splits fields by category" do
     s = build_submission
     s.update_field(:fein, "category" => "verified")
-    assert_equal ["fein"], s.verified_fields.map { _1["name"] }
+    assert_equal [ "fein" ], s.verified_fields.map { _1["name"] }
     assert_equal 12, s.needs_approval_fields.size
   end
 end

@@ -1,15 +1,15 @@
 require "test_helper"
 
 class PipelineStateTest < ActiveSupport::TestCase
-  def states(pipeline) = (pipeline.steps + pipeline.channels).to_h { [_1.key, pipeline.state(_1.key)] }
+  def states(pipeline) = (pipeline.steps + pipeline.channels).to_h { [ _1.key, pipeline.state(_1.key) ] }
 
   test "steps run in order with their actors and gates" do
     pipeline = PipelineState.new(page: nil)
-    assert_equal ["Transcript", "Extract fields", "Transcript check", "Broker review", "Build JSON", "Schema check", "Choose channel"],
+    assert_equal [ "Transcript", "Extract fields", "Transcript check", "Broker review", "Build JSON", "Schema check", "Choose channel" ],
                  pipeline.steps.map(&:label)
-    assert_equal ["Input", "AI (Granite)", "Code", "Human", "Code", "Code", "Human"], pipeline.steps.map(&:actor_label)
+    assert_equal [ "Input", "AI (Granite)", "Code", "Human", "Code", "Code", "Human" ], pipeline.steps.map(&:actor_label)
     assert_equal %w[transcript_check review schema], (pipeline.steps + pipeline.channels).select(&:gate).map(&:key)
-    assert_equal ["Acme API", "Beacon bot", "Northwind email"], pipeline.channels.map(&:label)
+    assert_equal [ "Acme API", "Beacon bot", "Northwind email" ], pipeline.channels.map(&:label)
     assert pipeline.channels.all? { _1.actor_label == "Code" && _1.channel? }
   end
 

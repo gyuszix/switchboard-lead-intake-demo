@@ -10,7 +10,7 @@ module PipelineHelper
     cross: '<path d="M4 4l8 8 M12 4l-8 8"/>'
   }.freeze
 
-  LEGEND = [[:ai, "AI"], [:code, "Code"], [:human, "Human"]].freeze
+  LEGEND = [ [ :ai, "AI" ], [ :code, "Code" ], [ :human, "Human" ] ].freeze
 
   STATE_TEXT = {
     "pending" => "Not started", "active" => "Current step", "done" => "Done", "failed" => "Failed",
@@ -33,15 +33,15 @@ module PipelineHelper
   def pipeline_step_tag(step, pipeline)
     state = pipeline.state(step.key)
     result = step.channel? && state != "pending"
-    actor = [pipeline_icon(step.actor), step.actor_label]
-    actor += [tag.span(class: "status-dot status-#{state}"), STATE_TEXT[state]] if result
+    actor = [ pipeline_icon(step.actor), step.actor_label ]
+    actor += [ tag.span(class: "status-dot status-#{state}"), STATE_TEXT[state] ] if result
     actor << tag.span("GATE", class: "gate-tag") if step.gate
-    tag.div(class: ["pipeline-step", "actor-#{step.actor}", "state-#{state}", ("gate" if step.gate), ("channel" if step.channel?)],
+    tag.div(class: [ "pipeline-step", "actor-#{step.actor}", "state-#{state}", ("gate" if step.gate), ("channel" if step.channel?) ],
             title: step.title, data: { pipeline_key: step.key }, aria: { current: ("step" if state == "active") }) do
       safe_join([
         tag.span(class: "pipeline-label") do
-          safe_join([(pipeline_icon(:check) if state == "done"), (pipeline_icon(:cross) if state == "failed" && !result), step.label,
-                     (pipeline_icon(:shield, css_class: "pipeline-icon pipeline-gate-icon") if step.gate)].compact, " ")
+          safe_join([ (pipeline_icon(:check) if state == "done"), (pipeline_icon(:cross) if state == "failed" && !result), step.label,
+                     (pipeline_icon(:shield, css_class: "pipeline-icon pipeline-gate-icon") if step.gate) ].compact, " ")
         end,
         tag.span(safe_join(actor, " "), class: "pipeline-actor"),
         tag.span(" (#{"Gate, " if step.gate}#{STATE_TEXT[state]})", class: "visually-hidden")

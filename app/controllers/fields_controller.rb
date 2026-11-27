@@ -6,15 +6,15 @@ class FieldsController < ApplicationController
   # Edit: replace the value with the broker's.
   def update
     error = @submission.edit!(@name, params[:value])
-    render_review(@submission, [@name], error: error)
+    render_review(@submission, [ @name ], error: error)
   end
 
   def approve
-    render_review(@submission, [@name], error: @submission.approve!(@name))
+    render_review(@submission, [ @name ], error: @submission.approve!(@name))
   end
 
   def not_provided
-    render_review(@submission, [@name], error: @submission.mark_not_provided!(@name))
+    render_review(@submission, [ @name ], error: @submission.mark_not_provided!(@name))
   end
 
   private

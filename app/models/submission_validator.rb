@@ -45,10 +45,10 @@ class SubmissionValidator
       return error.dig("details", "missing_keys").map { Error.new(field: _1, message: "Required for submission") }
     end
     # A disallowed additional property fails the `false` schema.
-    return [Error.new(field: field, message: "Unexpected field, not part of the submission schema")] if keyword == "schema"
-    return [Error.new(field: field, message: "Required for submission")] if error["data"].nil? || error["data"] == ""
+    return [ Error.new(field: field, message: "Unexpected field, not part of the submission schema") ] if keyword == "schema"
+    return [ Error.new(field: field, message: "Required for submission") ] if error["data"].nil? || error["data"] == ""
 
-    [Error.new(field: field, message: message_for(field, keyword))]
+    [ Error.new(field: field, message: message_for(field, keyword)) ]
   end
 
   def message_for(field, keyword)
@@ -75,6 +75,6 @@ class SubmissionValidator
     schema = JSON.parse(SCHEMA_PATH.read)
     top = schema["properties"]
     nested = top.values.select { _1["type"] == "object" }.flat_map { _1["properties"].to_a }
-    (top.to_a + nested).to_h { |name, s| [name, s["type"]] }
+    (top.to_a + nested).to_h { |name, s| [ name, s["type"] ] }
   end.freeze
 end

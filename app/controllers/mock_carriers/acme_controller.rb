@@ -12,7 +12,7 @@ module MockCarriers
       return render(json: { error: "unauthorized" }, status: :unauthorized) unless authorized?
 
       body = parse_body
-      details = body ? validate(body) : ["body must be a JSON object"]
+      details = body ? validate(body) : [ "body must be a JSON object" ]
       return render(json: { error: "invalid", details: details }, status: :unprocessable_entity) if details.any?
 
       if body["insured_name"] == "Acme Test Outage"

@@ -25,7 +25,7 @@ class FieldCheckerTest < ActiveSupport::TestCase
   # --- verified rules -------------------------------------------------------
 
   test "verified when value, quote, format and mentions all check out" do
-    assert_empty check("fein", "12-3456789", "Our FEIN is 12-3456789.", ["Our FEIN is 12-3456789."])
+    assert_empty check("fein", "12-3456789", "Our FEIN is 12-3456789.", [ "Our FEIN is 12-3456789." ])
   end
 
   test "categorise builds full field hashes in order" do
@@ -34,7 +34,7 @@ class FieldCheckerTest < ActiveSupport::TestCase
     zip = fields.find { _1["name"] == "zip" }
     assert_equal "verified", zip["category"]
     assert_nil zip["resolution"]
-    assert_equal ["Not stated in call"], fields.find { _1["name"] == "fein" }["reasons"]
+    assert_equal [ "Not stated in call" ], fields.find { _1["name"] == "fein" }["reasons"]
   end
 
   test "categorise treats missing or malformed fields as null" do
@@ -47,12 +47,12 @@ class FieldCheckerTest < ActiveSupport::TestCase
   test "years in business always needs approval even when every check passes" do
     t = "Client: We have been in business for 9 years."
     reasons = FieldChecker.new(t, today: TODAY).check("years_in_business", "9",
-      "We have been in business for 9 years.", ["We have been in business for 9 years."])
-    assert_equal ["Requires interpretation (durations and dates relative to the call)"], reasons
+      "We have been in business for 9 years.", [ "We have been in business for 9 years." ])
+    assert_equal [ "Requires interpretation (durations and dates relative to the call)" ], reasons
   end
 
   test "null value is not stated in call" do
-    assert_equal ["Not stated in call"], check("contact_email", nil, nil)
+    assert_equal [ "Not stated in call" ], check("contact_email", nil, nil)
   end
 
   test "quote not found in transcript" do
@@ -70,7 +70,7 @@ class FieldCheckerTest < ActiveSupport::TestCase
   test "FEIN format invalid" do
     t = "Client: The FEIN is 12-34567890."
     reasons = FieldChecker.new(t, today: TODAY).check("fein", "12-34567890", "The FEIN is 12-34567890.", [])
-    assert_equal ["FEIN format invalid (expected NN-NNNNNNN)"], reasons
+    assert_equal [ "FEIN format invalid (expected NN-NNNNNNN)" ], reasons
   end
 
   test "format rules per field" do
@@ -100,7 +100,7 @@ class FieldCheckerTest < ActiveSupport::TestCase
   end
 
   test "mention not found in transcript" do
-    assert_includes check("zip", "02134", "The zip is 02134.", ["zip is 02134 in Boston"]), "Mention not found in transcript"
+    assert_includes check("zip", "02134", "The zip is 02134.", [ "zip is 02134 in Boston" ]), "Mention not found in transcript"
   end
 
   # --- normalised matching --------------------------------------------------
@@ -137,7 +137,7 @@ class FieldCheckerTest < ActiveSupport::TestCase
   end
 
   test "line index uses normalised matching" do
-    lines = ["Broker: Hi.", "Client: Our FEIN is 12-3456789."]
+    lines = [ "Broker: Hi.", "Client: Our FEIN is 12-3456789." ]
     assert_equal 1, FieldChecker.line_index(lines, "our fein is 12 3456789")
     assert_nil FieldChecker.line_index(lines, "not here")
     assert_nil FieldChecker.line_index(lines, nil)
@@ -147,29 +147,29 @@ class FieldCheckerTest < ActiveSupport::TestCase
 
   test "conflicting numeric mention" do
     reasons = check("employee_count", "45", "actually closer to 45 now",
-      ["We have about 40 employees... actually closer to 45 now."])
-    assert_equal ["Conflicting mentions in transcript"], reasons
+      [ "We have about 40 employees... actually closer to 45 now." ])
+    assert_equal [ "Conflicting mentions in transcript" ], reasons
   end
 
   test "agreeing mentions do not conflict" do
-    assert_empty check("zip", "02134", "The zip is 02134.", ["The zip is 02134."])
+    assert_empty check("zip", "02134", "The zip is 02134.", [ "The zip is 02134." ])
   end
 
   test "conflicting email mention" do
     t = TRANSCRIPT + "Client: Or use jane@gmail.com.\n"
     reasons = FieldChecker.new(t, today: TODAY).check("contact_email", "jane@sunrisebakery.com",
-      "Email me at Jane@SunriseBakery.com please.", ["Or use jane@gmail.com."])
-    assert_equal ["Conflicting mentions in transcript"], reasons
+      "Email me at Jane@SunriseBakery.com please.", [ "Or use jane@gmail.com." ])
+    assert_equal [ "Conflicting mentions in transcript" ], reasons
   end
 
   test "conflicting date mention" do
     t = TRANSCRIPT + "Client: Or maybe February 1st.\n"
     reasons = FieldChecker.new(t, today: TODAY).check("effective_date", "2027-01-15",
-      "We'd like coverage to start January 15th, 2027.", ["Or maybe February 1st."])
-    assert_equal ["Conflicting mentions in transcript"], reasons
+      "We'd like coverage to start January 15th, 2027.", [ "Or maybe February 1st." ])
+    assert_equal [ "Conflicting mentions in transcript" ], reasons
   end
 
   test "free text fields are not checked for conflicting values" do
-    assert_empty check("business_name", "Sunrise Bakery", "It's Sunrise Bakery, LLC.", ["What's the business called?"])
+    assert_empty check("business_name", "Sunrise Bakery", "It's Sunrise Bakery, LLC.", [ "What's the business called?" ])
   end
 end

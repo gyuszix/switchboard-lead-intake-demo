@@ -61,7 +61,7 @@ class PipelineState
   def latest_channel_statuses(submission)
     return {} unless submission
     submission.quote_requests.to_a.group_by(&:channel).to_h do |channel, requests|
-      ["channel_#{channel}", requests.max_by { [_1.created_at || Time.current, _1.id || 0] }.status]
+      [ "channel_#{channel}", requests.max_by { [ _1.created_at || Time.current, _1.id || 0 ] }.status ]
     end
   end
 end

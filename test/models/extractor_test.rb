@@ -27,11 +27,11 @@ class ExtractorTest < ActiveSupport::TestCase
   end
 
   test "parses fields from the model response" do
-    content = { zip: { value: "60614", source_quote: "The zip code is 60614.", all_mentions: ["The zip code is 60614."] } }.to_json
+    content = { zip: { value: "60614", source_quote: "The zip code is 60614.", all_mentions: [ "The zip code is 60614." ] } }.to_json
     result = extractor(body: ollama_body(content)).call("x")
     assert_not result.used_fixtures
     assert_equal "60614", result.fields["zip"]["value"]
-    assert_equal ["The zip code is 60614."], result.fields["zip"]["all_mentions"]
+    assert_equal [ "The zip code is 60614." ], result.fields["zip"]["all_mentions"]
   end
 
   test "invalid JSON becomes empty fields" do
@@ -41,11 +41,11 @@ class ExtractorTest < ActiveSupport::TestCase
   end
 
   test "malformed field is dropped and treated as null" do
-    content = { zip: "60614", fein: { value: ["12", "3"], all_mentions: "nope" } }.to_json
+    content = { zip: "60614", fein: { value: [ "12", "3" ], all_mentions: "nope" } }.to_json
     fields = extractor(body: ollama_body(content)).call("x").fields
     assert_nil fields["zip"]
     assert_equal "12, 3", fields["fein"]["value"]
-    assert_equal ["nope"], fields["fein"]["all_mentions"]
+    assert_equal [ "nope" ], fields["fein"]["all_mentions"]
   end
 
   test "falls back to fixtures for a sample transcript when Ollama is unreachable" do
@@ -64,7 +64,7 @@ class ExtractorTest < ActiveSupport::TestCase
   test "sample fixtures categorise as each sample intends" do
     by_key = Sample.all.to_h do |s|
       fields = FieldChecker.new(s[:transcript], today: Date.new(2026, 11, 26)).categorise(Sample.fixture_for(s[:transcript]))
-      [s[:key], fields.select { _1["category"] == "needs_approval" }.map { _1["name"] }]
+      [ s[:key], fields.select { _1["category"] == "needs_approval" }.map { _1["name"] } ]
     end
     assert_equal %w[northgate_dental hudson_millwork lumen_analytics], by_key.keys
     assert_equal %w[years_in_business], by_key["northgate_dental"]
