@@ -76,12 +76,12 @@ AI touches the data once, at the start. Everything after it is code proving some
 
 The model's output is treated as a claim, not an answer. A **checkpoint** flags what code can't prove; a **gate** stops anything moving on until it passes.
 
-| Step | Who | Type | What it does |
-| --- | --- | --- | --- |
-| Extract fields | AI | | Pulls each field's value and the exact quote it came from. Never trusted on its own |
-| Transcript check | Code | Checkpoint | Quote exists in the transcript, value appears in the quote, valid format, no conflicting mentions |
-| Broker review | Human | Gate | Approves, edits or fills every field before anything is built |
-| Schema check | Code | Gate | Every field present with the right type and format before anything reaches a carrier |
+| Step | Who | What it does |
+| --- | --- | --- |
+| Extract fields | AI | Pulls each field's value and the exact quote it came from. Never trusted on its own |
+| Transcript check | Code | Checkpoint: quote exists in the transcript, value appears in the quote, valid format, no conflicting mentions |
+| Broker review | Human | Gate: approves, edits or fills every field before anything is built |
+| Schema check | Code | Gate: every field present with the right type and format before anything reaches a carrier |
 
 Code proves a value wasn't invented. The broker confirms it's right. The schema guarantees every carrier gets the same well-formed record.
 
