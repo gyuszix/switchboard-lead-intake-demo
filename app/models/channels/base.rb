@@ -10,6 +10,7 @@ module Channels
                                 carrier: carrier, status: "failed", message: reason)
       end
 
+      @submission = submission
       attrs = begin
         deliver(submission.submission_json)
       rescue StandardError => e

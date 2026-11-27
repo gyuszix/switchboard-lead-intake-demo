@@ -1,0 +1,10 @@
+Hello Northwind Specialty team,
+
+Please find attached a commercial insurance application for quoting.
+
+Business name:  <%= @json.dig("applicant", "business_name") %>
+Submission ID:  <%= @submission.id %>
+Coverages:      <%= Array(@json.dig("coverage", "coverage_types")).join(", ") %>
+Effective date: <%= @json.dig("coverage", "effective_date") %>
+
+Thank you.
