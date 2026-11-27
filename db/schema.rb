@@ -10,7 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_26_234016) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_27_002553) do
+  create_table "quote_requests", force: :cascade do |t|
+    t.integer "submission_id", null: false
+    t.string "channel", null: false
+    t.string "carrier", null: false
+    t.string "status", null: false
+    t.integer "premium"
+    t.string "reference"
+    t.text "message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["submission_id"], name: "index_quote_requests_on_submission_id"
+  end
+
   create_table "submissions", force: :cascade do |t|
     t.text "transcript", null: false
     t.json "fields", default: [], null: false
@@ -20,4 +33,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_26_234016) do
     t.json "submission_json"
     t.datetime "ready_at"
   end
+
+  add_foreign_key "quote_requests", "submissions"
 end

@@ -14,6 +14,8 @@ class Submission < ApplicationRecord
   CATEGORIES = %w[verified needs_approval].freeze
   RESOLUTIONS = %w[confirmed approved edited not_provided].freeze
 
+  has_many :quote_requests, -> { order(created_at: :desc, id: :desc) }, dependent: :destroy
+
   validates :transcript, presence: true
 
   # Any change to the reviewed fields invalidates a built submission.
