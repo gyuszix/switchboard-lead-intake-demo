@@ -95,9 +95,9 @@ That's why the model is never asked for a confidence score: a model's opinion of
 
 The samples show this:
 
-- **Bakery (clean):** everything is stated plainly, and every field verifies except years in business, which always needs a broker.
-- **Landscaping (misheard FEIN):** the FEIN is read out awkwardly, so the extracted value has the wrong digit count and fails format validation. The email is never mentioned. Both go to the broker.
-- **IT services (messy):** the employee count is corrected mid-call ("about 40... closer to 45 now"), so the mentions conflict. Revenue is given in words, so code can't prove the number. Both go to the broker.
+- **Northgate Dental (happy path):** everything is stated plainly, and every field verifies except years in business, which always needs a broker. Acme and Beacon both quote it.
+- **Hudson Millwork (AI caught):** a noisy call. The FEIN is spoken as words, the NAICS code is never given, revenue is in words, the employee count is corrected mid-call (38, then 41), a second location's ZIP is mentioned, the start date is "the first of April next year", and the email is spelled out. Code can prove none of those, so all eight go to the broker. Revenue over $5M means both quoting carriers refer it.
+- **Lumen Analytics (channels differ):** clean, except a ZIP+4 (`07302-3911`) that fails the 5-digit rule. Once fixed, Acme quotes it, but Beacon's portal has no cyber checkbox, so the bot stops before submitting.
 
 The pipeline keeps three roles apart:
 
